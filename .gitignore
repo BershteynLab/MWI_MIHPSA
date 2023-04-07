@@ -1,0 +1,16 @@
+output/
+HIVCalibSite*
+HIVCalibSite**/*
+.vscode
+__pycache__/
+COMPS_log.log
+post_channel_config.json
+DownloadAnalyzerTPI_cache/
+resampled_parameter_sets.csv
+
+Malawi--0.01--rep3--test0/
+Malawi--0.0001--rep3--test0/
+MWI_mort/
+MWI_test/
+MWI_resample/
+MWI_transmission/
