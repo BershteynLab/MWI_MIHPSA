@@ -1538,7 +1538,7 @@ for (col.ix in 3:62){
 }
 ```
 
-## Sanity Checks
+# Sanity Checks
 
 Count the total number of deaths by year, for one report and one mort report
 

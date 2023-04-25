@@ -1,10 +1,9 @@
 {
     "Metadata": {
-        "DateCreated": "Tues March 24, 2015",
-        "Tool": "D:\\dklein\\SVN\\EMOD_Research\\Groups\\HIV\\Matlab\\2014\\SA Mortality Analysis\\Matlab\\ExtrapolateUNMortality.m",
-        "Author": "Daniel J. Klein",
+        "DateCreated": "April 22, 2023",
+        "Author": "Daniel T Citron",
         "RegionName": "Malawi_Three_Node",
-        "DataSource": "UN Population Division, 2012 Estimates, plus extrapolation",
+        "DataSource": "2022 UN WPP estimates plus extrapolation",
         "IdReference": "0",
         "NodeCount": 3,
         "NOTE": "Mortality has been extrapolated, but fertility still ends before HIV had a demographic impact."
@@ -1090,9 +1089,9 @@
                         2062.5
                     ]
                 ],
-                "ResultsScaleFactor": 2.7397260273972604e-06,
-                "ResultsUnits": "annual deaths per capita",
-                "ResultsValues": [
+                "ResultScaleFactor": 2.7397260273972604e-06,
+                "ResultUnits": "annual deaths per capita",
+                "ResultValues": [
                     [
                         0.2183932399999999,
                         0.21458247999999994,
@@ -2234,9 +2233,9 @@
                         2062.5
                     ]
                 ],
-                "ResultsScaleFactor": 2.7397260273972604e-06,
-                "ResultsUnits": "annual deaths per capita",
-                "ResultsValues": [
+                "ResultScaleFactor": 2.7397260273972604e-06,
+                "ResultUnits": "annual deaths per capita",
+                "ResultValues": [
                     [
                         0.18727146999999997,
                         0.18438117,

@@ -1283,7 +1283,9 @@ dat.transm.output <- read_csv("/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_2
 
 ```{r}
 # These are the columns that loveleen wanted
-dat.transm.output %>% select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total)
+dat.transm.output %>% 
+  select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total) %>%
+  filter(Age_bin == 20)
 ```
 
 
@@ -1330,23 +1332,52 @@ dat.transm.all.list %>%
   group_by(Tr_year_binned, Age_bin) %>% 
   summarize(All.total = mean(All.total*pop.scaling.factor)) %>% 
   arrange(Age_bin, Tr_year_binned) %>% 
-  filter(Age_bin == 20)
+  filter(Age_bin == 15)
   
 ```
 
 ```{r}
 dat.transm.all.list %>% select(Tr_year_binned, Age_bin, All.total, sim.id) %>% 
-  filter(Age_bin == 20)
+  filter(Age_bin == 20) %>% 
+  inner_join(
+    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
+    by = c("sim.id")
+  ) %>% 
+  group_by(Tr_year_binned, Age_bin) %>% 
+  summarize(All.total = mean(All.total * pop.scaling.factor), .groups = 'keep')
 ```
 
 
 ```{r}
-
-
 dat.transm.list %>% 
   select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total, sim.id) %>%
   mutate(All.total =  Undiagnosed.total + Diagnosed_noART.total + OnART.VL.Supp.total + OnART.VL.NoSupp.total + DropOut.total) %>% 
-  filter(Age_bin == 20)
+  filter(Age_bin == 20) %>% 
+  inner_join(
+    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
+    by = c("sim.id")
+  ) %>% 
+  group_by(Tr_year_binned, Age_bin) %>% 
+  summarize(All.total = mean(All.total * pop.scaling.factor), .groups = 'keep')
 ```
 
+
+```{r}
+dat.transm.list %>% group_by(Tr_year_binned, Age_bin) %>% 
+  summarize(Undiagnosed.total = mean(Undiagnosed.total*pop.scaling.factor))
+```
+
+
+```{r}
+dat.transm.list %>% 
+  select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total, sim.id) %>%
+  mutate(All.total =  Undiagnosed.total + Diagnosed_noART.total + OnART.VL.Supp.total + OnART.VL.NoSupp.total + DropOut.total) %>% 
+  filter(Age_bin == 20) %>% 
+  inner_join(
+    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
+    by = c("sim.id")
+  ) %>% 
+  group_by(Tr_year_binned, Age_bin) %>% 
+  summarize(Undiagnosed.total = mean(Undiagnosed.total * pop.scaling.factor), .groups = 'keep')
+```
 
