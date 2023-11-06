@@ -35,7 +35,7 @@ Second, we also will need to know a few baseline things:
   * Of those on art, what percent virally suppressed (92%)
   
 ```{r Load Report Data}
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-transmission___2022_09_15_17_26_45_584971"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-transmission___2023_11_04_11_30_19_157590"
 
 sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
@@ -269,7 +269,7 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
 
 
 ```{r Save baseline output}
-write_excel_csv(baseline.comp.data, "transmission_baseline_comp_data.csv")
+write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/transmission_baseline_comp_data.csv")
 ```
 
 One last thing to do: the mortality tables do need two additional columns: total number of HIV deaths and total hiv population at mid year
@@ -360,6 +360,7 @@ year.age.sex = full_join(
 ```
 
 ```{r Look at Transmissions Report}
+folder.list = Sys.glob(paste0(input_path, "/Simulation_*"))
 
 i = 1
 f <- paste(folder.list[i], "output/TransmissionReport.csv", sep="/")
@@ -490,7 +491,8 @@ fun.diag.noart = function(tr.data, event.report, year.age.sex){
   p2 <- left_join(
     tr.data %>% filter(Tr_year_binned >= 2000),
     art.report %>% filter(event == "InitART") %>% select(-c(Gender, Age)) %>% rename("ArtYear" = Year),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     # take first time someone gets art 
     arrange(Tr_year_binned, ArtYear) %>% 
@@ -631,7 +633,8 @@ fun.onart.under6mo.reinit <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% filter((Tr_year > Year_InitART))
   
   p <- p %>% 
@@ -649,7 +652,8 @@ fun.onart.under6mo.reinit <- function(tr.data, art.report, year.age.sex){
     filter(CD4_InitART < 200) %>% 
     group_by(Tr_year_binned, Age_bin, Gender) %>% count() %>% rename("OnART.afterInterrupt.under6mo.under200" = n)
   
-  p1 <- left_join(year.age.sex, p1, by = c("Tr_year_binned", "Age_bin", "Gender")) %>% 
+  p1 <- left_join(year.age.sex, p1, 
+                  by = c("Tr_year_binned", "Age_bin", "Gender")) %>% 
     replace_na(list(OnART.afterInterrupt.under6mo.under200 = 0))
   
   # filter on CD4 over 200
@@ -659,7 +663,8 @@ fun.onart.under6mo.reinit <- function(tr.data, art.report, year.age.sex){
     filter(CD4_InitART >= 200) %>% 
     group_by(Tr_year_binned, Age_bin, Gender) %>% count() %>% rename("OnART.afterInterrupt.under6mo.over200" = n)
   
-  p2 <- left_join(year.age.sex, p2, by = c("Tr_year_binned", "Age_bin", "Gender")) %>% 
+  p2 <- left_join(year.age.sex, p2, 
+                  by = c("Tr_year_binned", "Age_bin", "Gender")) %>% 
     replace_na(list(OnART.afterInterrupt.under6mo.over200 = 0))
   
   # merge together
@@ -710,7 +715,8 @@ fun.onart.vl <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_InitART)) %>% 
     # take most recent art initiation
@@ -763,7 +769,8 @@ fun.onart.under6mo.vl <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_InitART)) %>% 
     # take most recent art initiation
@@ -819,7 +826,8 @@ fun.onart.over6mo.vl <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_InitART)) %>% 
     # take most recent art initiation
@@ -878,7 +886,8 @@ fun.dropout.all <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_DropOut)) %>% 
     # take most recent dropout
@@ -936,7 +945,8 @@ fun.dropout.first <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_DropOut)) %>% 
     # take most recent dropout
@@ -968,7 +978,6 @@ fun.dropout.first <- function(tr.data, art.report, year.age.sex){
 
 dat.dropout.first <- fun.dropout.first(tr.data, art.report, year.age.sex)
 
-
 dat.dropout.first %>% head
 ``` 
 
@@ -996,7 +1005,8 @@ fun.dropout.subseq.under6 <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_DropOut)) %>% 
     # take most recent dropout before the transmission
@@ -1060,7 +1070,8 @@ fun.dropout.subseq.over6 <- function(tr.data, art.report, year.age.sex){
       pivot_wider(id_cols = c(Individual_ID, Gender, event_ix),
                     names_from = c(event),
                     values_from = c(Year, Age, CD4)),
-    by = c("id" = "Individual_ID")
+    by = c("id" = "Individual_ID"),
+    relationship = "many-to-many"
   ) %>% 
     filter((Tr_year > Year_DropOut)) %>% 
     # take most recent dropout before the transmission
@@ -1158,7 +1169,7 @@ for (i in 1:length(folder.list)){
 
 dat.transm.list = list()
 
-for (i in range(1:length(folder.list))){
+for (i in range(1:3)){ #range(1:length(folder.list))){
   tr.data = tr.data.list[[i]]
   event.report = event.report.list[[i]]
   art.report = art.report.list[[i]]
@@ -1191,12 +1202,47 @@ for (i in range(1:length(folder.list))){
     merge( dat.dropout.subseq.over6mo, by = c("Tr_year_binned","Age_bin") ) 
   
   dat.transm$sim.id <- i
+  print(i)
   
   dat.transm.list[[i]] <- dat.transm
 }
 
 dat.transm.list <- bind_rows(dat.transm.list)
 ```
+
+```{r}
+tr.data = tr.data.list[[i]]
+event.report = event.report.list[[i]]
+art.report = art.report.list[[i]]
+
+dat.undiagnosed = fun.undiag(tr.data, event.report, year.age.sex)
+dat.diagnosed.noART <- fun.diag.noart(tr.data, event.report, year.age.sex)#
+dat.onart.under6mo.firstinit = fun.onart.under6mo.firstinit(tr.data, art.report, year.age.sex)#
+dat.onart.under6mo.reinit <- fun.onart.under6mo.reinit(tr.data, art.report, year.age.sex)#
+dat.onart.vl <- fun.onart.vl(tr.data, art.report, year.age.sex)#
+dat.onart.under.6mo.vl = fun.onart.under6mo.vl(tr.data, art.report, year.age.sex)#
+dat.onart.over.6mo.vl <- fun.onart.over6mo.vl(tr.data, art.report, year.age.sex)#
+dat.dropout <- fun.dropout.all(tr.data, art.report, year.age.sex)#
+dat.dropout.first <- fun.dropout.first(tr.data, art.report, year.age.sex)#
+dat.dropout.subseq.under6mo <- fun.dropout.subseq.under6(tr.data, art.report, year.age.sex)#
+dat.dropout.subseq.over6mo <- fun.dropout.subseq.over6(tr.data, art.report, year.age.sex)#
+
+dat.transm <- merge(
+  dat.undiagnosed,
+  dat.diagnosed.noART,
+  by = c("Tr_year_binned","Age_bin")
+) %>% 
+  merge( dat.onart.under6mo.firstinit, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.onart.under6mo.reinit, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.onart.vl, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.onart.under.6mo.vl, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.onart.over.6mo.vl, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.dropout, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.dropout.first, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.dropout.subseq.under6mo, by = c("Tr_year_binned","Age_bin") ) %>% 
+  merge( dat.dropout.subseq.over6mo, by = c("Tr_year_binned","Age_bin") ) 
+```
+
 
 ## Format and prep output
 ```{r Rescale according to population scale factor}
