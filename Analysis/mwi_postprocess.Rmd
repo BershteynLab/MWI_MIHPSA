@@ -323,7 +323,7 @@ deaths.summary %>%
 # HIV Prevalence
 This is calculated at each time step as number infected divided by the population
 
-The MIHPSA report wants to find FSW and MSM prevalences, but I don't think I'm able to do that with the reports 
+The MIHPSA 
 ```{r Prevalence }
 # Males 15-24 
 p1 <- sim.results %>% 

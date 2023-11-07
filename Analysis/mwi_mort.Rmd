@@ -35,7 +35,7 @@ Second, we also will need to know a few baseline things:
   * Of those on art, what percent virally suppressed (92%)
   
 ```{r Load Report Data}
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-mort___2022_09_05_17_05_30_242956"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-mort___2023_11_06_21_47_46_089549//"
 
 sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
@@ -50,6 +50,7 @@ sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   ungroup()
 
 ```
+
 ```{r Population rescaling factor}
 CENSUS_YEAR = 2018.5
 MALAWI_CENSUS_POP = 17563749
@@ -60,7 +61,7 @@ sim.results.pop.scaling <- sim.results %>%
       summarize(total.pop = sum(Population), .groups = 'keep') %>% 
       mutate(pop.scaling.factor = MALAWI_CENSUS_POP/total.pop)
 
-sim.results.pop.scaling$sim.id.ix <- 1:25
+sim.results.pop.scaling$sim.id.ix <- 1:250
 
 sim.results <- sim.results %>% 
   inner_join(
@@ -268,7 +269,7 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
 
 
 ```{r Save baseline output}
-write_excel_csv(baseline.comp.data, "mort_baseline_comp_data.csv")
+write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mort_baseline_comp_data.csv")
 ```
 
 
@@ -364,8 +365,7 @@ year.age.sex = full_join(
 folder.list = Sys.glob(paste0(input_path, "/Simulation_*"))
 
 mort.data.sets = list()
-for (i in seq(1,length(folder.list),1)){
-  
+for (i in (1:length(folder.list))){
   # Read in the event report
   f <- paste(folder.list[i], "output/ReportEventRecorder.csv", sep="/")
   event.report <- fread(f, check.names = TRUE)
@@ -945,9 +945,9 @@ mort.data.means <- merge(dat.plhiv %>% mutate(Year = Year- .5), dat.hivdeaths , 
   merge(mort.data.means, by = c("Death_year","Age_bin")) %>% 
   arrange(Age_bin, Death_year)
 
-#mort.data.means %>% View()
+mort.data.means %>% head()
 
-write_excel_csv(mort.data.means, 'mihpsa_mortality_table.csv')
+write_excel_csv(mort.data.means, '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mihpsa_mortality_table.csv')
 
 ```
 
