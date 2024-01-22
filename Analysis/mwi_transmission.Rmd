@@ -73,6 +73,12 @@ sim.results$sim.id.ix <- NULL
 
 ```
 
+# Epidemiological measurements
+
+Here we measure the basic aspects of the outbreak
+
+## Population
+
 ```{r Population}
 p1 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Population, sim.id, pop.scaling.factor) %>%
@@ -106,6 +112,7 @@ baseline.comp.data <- merge(p1, p2, by = c("Year")) %>%
   merge(p3, by = c("Year"))
 ```
 
+## Prevalence 
 
 ```{r Prevalence data}
 # Males
@@ -142,6 +149,8 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
   merge(p2, by = c("Year")) %>% 
   merge(p3, by = c("Year"))
 ```
+
+## New HIV Infections
 
 ```{r New HIV Infections}
 # Males 
@@ -189,6 +198,7 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
   merge(p3, by = c("Year"))
 ```
 
+## Diagnosed 
 ```{r Proportion diagnosed}
 p1 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Diagnosed, Infected, sim.id, pop.scaling.factor) %>%
@@ -228,6 +238,7 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
   merge(p3, by = c("Year"))
 ``` 
 
+## ART
 ```{r Percent diagnosed on ART}
 p1 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, On_ART, Diagnosed, sim.id, pop.scaling.factor) %>%
@@ -267,10 +278,50 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
   merge(p3, by = c("Year"))
 ```
 
-
+## Save output
 ```{r Save baseline output}
 write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/transmission_baseline_comp_data.csv")
 ```
+
+## Additional analysis
+
+What is the proportion of new infections by age group?
+
+```{r}
+subset.years = c(2010, 2020, 2030, 2040)
+
+data <- sim.results %>% filter(Year %in% subset.years)
+
+data %>% group_by(Year, Gender, Age, sim.ix) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor)) %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(Newly.Infected = mean(Newly.Infected)) %>% 
+  ungroup() %>% 
+  ggplot() + 
+  geom_point(mapping = aes(x = Age, y = Newly.Infected)) + 
+  facet_grid(cols = vars(Gender), rows = vars(Year))
+
+```
+What is the percentage on ART in each age group?
+
+```{r}
+data <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Age >=15, Age < 65, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, Age, sim.id) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), On_ART = sum(On_ART*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  mutate(OnART.Infected = case_when(On_ART == 0 ~ 0,
+                                     On_ART > 0 ~ On_ART/Infected) ) %>%
+  group_by(Year, Gender, Age) %>% 
+  summarize(mean.plhiv.onart.males = mean(OnART.Infected), .groups = 'keep') %>% 
+  ungroup()
+
+data %>% filter(Year %in% c(2010.5, 2020.5, 2030.5, 2040.5))
+
+```
+
+## HIV Mortality
 
 One last thing to do: the mortality tables do need two additional columns: total number of HIV deaths and total hiv population at mid year
 Total, men, and women
@@ -1427,3 +1478,4 @@ dat.transm.list %>%
   summarize(Undiagnosed.total = mean(Undiagnosed.total * pop.scaling.factor), .groups = 'keep')
 ```
 
+New suggested figure: breakdown of transmission events by age
