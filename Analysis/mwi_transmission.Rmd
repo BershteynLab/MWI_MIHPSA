@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The purpose of this notebook is to figure out how to examine the transmission events in the Malawi EMOD model
+The purpose of this notebook is to figure out how to examine the transmission events in the Malawi EMOD model.
 
 ```{r Load libraries}
 library(tidyverse)
@@ -285,6 +285,8 @@ write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_c
 
 ## Additional analysis
 
+(These columns are not explicitly requested for the sources of transmissions project.)
+
 What is the proportion of new infections by age group?
 
 ```{r}
@@ -397,7 +399,7 @@ dat.hivdeaths <- p3  %>%
   arrange(Age, Year)
 ```
 
-# Dry run through Transmission reports data
+# Analysis of Transmission Reports Data
 
 ## Read Event Reports and Transmission Reports
 ```{r For formatting the mortality data set}
@@ -465,12 +467,14 @@ art.report <- art.report %>% select(Individual_ID = ID, Age, Gender, CD4, Year, 
 head(art.report)
 ```
 
-## Define functions
+# Define functions
 
-Because it is so much trickier when we need to keep track of the full timelines of people's lives, will need to keep these three tables separated for now, and perform a series of clever joins to subset the data. Anything less than this will be too complicated to assimilate all this together.
+Each of these functions will be used later to fill out the table of sources of transmissions
+
+## Undiagosed
 
 ```{r Undiagnosed}
-# Need to know all the people who transmitted before thefy got diagnosed
+# Need to know all the people who transmitted before they got diagnosed
 # Find set of all transmissions
 # Find set of all transmissions that happened after diagnosis
 # Subtract.
@@ -520,6 +524,7 @@ dat.undiagnosed = fun.undiag(tr.data, event.report, year.age.sex)
 dat.undiagnosed %>% head
 ```
 
+## Diagnosed, not on ART 
 
 ```{r Diagnosed without ART}
 # Find the set of all transmissions after diagnosis
@@ -583,7 +588,8 @@ dat.diagnosed.noART %>% head
 
 ```
 
-
+## On ART less than 6 months after first ART initiation
+Stratify by CD4 count
 
 ```{r On art less than 6 mos after first init by cd4 count}
 # number all initiations grouped by id; take only the first one for each person
@@ -662,6 +668,10 @@ dat.onart.under6mo.firstinit = fun.onart.under6mo.firstinit(tr.data, art.report,
 
 dat.onart.under6mo.firstinit %>% head
 ```
+
+## On ART less than 6 months after ART re-initiation
+
+Stratify by CD4 count
 
 ```{r OnART less than six months after re-initiation by CD4}
 # "After interruption, on ART <6 months after last re-initiation, last re-initiated with CD4 <200"
@@ -748,6 +758,8 @@ dat.onart.under6mo.reinit <- fun.onart.under6mo.reinit(tr.data, art.report, year
 dat.onart.under6mo.reinit %>% head()
 ```
 
+## On ART stratify by Viral Load
+
 ```{r On ART by VL}
 # look for all initiations and dropouts
 # join with tr.data
@@ -784,7 +796,7 @@ fun.onart.vl <- function(tr.data, art.report, year.age.sex){
     replace_na(list(OnART = 0))
   
   dat.onart.vl <- p1 %>% 
-    mutate(OnART.VL.Supp = .92 * OnART, OnART.VL.NoSupp = .08 * OnART) %>% 
+    mutate(OnART.VL.Supp =  .08 * OnART, OnART.VL.NoSupp = .92 * OnART) %>% 
     mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
     pivot_wider(id_cols = c(Tr_year_binned, Age_bin),
                 names_from = c(gcode), 
@@ -801,6 +813,7 @@ dat.onart.vl %>% head()
  
 ```
 
+## On ART less than 6 months, stratify by viral load
 ```{r Onart under 6mo by VL}
 # look for all initiations and dropouts
 # join with tr.data
@@ -858,6 +871,8 @@ dat.onart.under.6mo.vl %>% head()
 
 ```
 
+## On ART more than 6 months, stratify by viral load
+
 ```{r Onart over 6mo by VL}
 # look for all initiations and dropouts
 # join with tr.data
@@ -914,6 +929,8 @@ dat.onart.over.6mo.vl <- fun.onart.over6mo.vl(tr.data, art.report, year.age.sex)
 dat.onart.over.6mo.vl %>% head()
 
 ```
+
+## Dropped out of ART
 
 ```{r Dropped out of ART}
 # look for all initiations and dropouts
@@ -973,6 +990,7 @@ dat.dropout %>% head()
 
 ```
 
+## Dropped out of ART, first ART interruption only
 ```{r Dropped out of ART first interruption only}
 # look for all initiations and dropouts; number dropouts
 # join with tr.data
@@ -1032,6 +1050,7 @@ dat.dropout.first <- fun.dropout.first(tr.data, art.report, year.age.sex)
 dat.dropout.first %>% head
 ``` 
 
+## Dropped out of ART, 2nd+ interruption, less than 6 months
 ```{r Dropped out of ART subsequent interruption only less than 6 months}
 # look for all initiations and dropouts; number dropouts
 # join with tr.data
@@ -1096,6 +1115,8 @@ dat.dropout.subseq.under6mo %>% head()
 
 
 ``` 
+
+## Dropped out of ART, 2nd+ interruption, more than 6 months
 
 ```{r Dropped out of ART subsequent interruption only more than 6 months} 
 # look for all initiations and dropouts; number dropouts
@@ -1372,110 +1393,5 @@ dat.transm.output <- merge(dat.plhiv %>% mutate(Year = Year- .5), dat.hivdeaths 
 write_excel_csv(dat.transm.output, "mihpsa_transmissions_table.csv")
 ```
 
-# Spot checking results
-
-```{r}
-dat.transm.output <- read_csv("/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mihpsa_transmissions_table.csv")
-```
-
-```{r}
-# These are the columns that loveleen wanted
-dat.transm.output %>% 
-  select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total) %>%
-  filter(Age_bin == 20)
-```
 
 
-```{r}
-
-dat.transm.all.list = list()
-
-
-for (i in range(1:length(folder.list))){
-  tr.data = tr.data.list[[i]]
-  
-  p1 <- tr.data %>% filter(Tr_year_binned >= 2000) %>% 
-    group_by(Tr_year_binned, Age_bin, Gender) %>% count() %>% rename("n_all" = n)
-    
-  p = left_join(
-      year.age.sex,
-      p1,
-      by = c("Tr_year_binned", "Age_bin", "Gender")
-    ) %>% replace_na(list(n_all = 0))
-  
-  dat.transm <- p %>% mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
-    pivot_wider(id_cols = c(Tr_year_binned, Age_bin),
-                names_from = c(gcode), 
-                values_from = c(n_all), 
-                names_prefix = 'All.', names_sep = '') %>%
-    mutate(All.total = All.m + All.f) %>% 
-    arrange(Age_bin, Tr_year_binned) %>% select(c(1,2,5,3,4))
-  
-  
-  dat.transm$sim.id <- i
-  
-  dat.transm.all.list[[i]] <- dat.transm
-}
-
-dat.transm.all.list <- bind_rows(dat.transm.all.list)
-  
-dat.transm.all.list <- dat.transm.all.list %>% 
-  inner_join(
-    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
-    by = c("sim.id")
-  )
-
-dat.transm.all.list %>% 
-  group_by(Tr_year_binned, Age_bin) %>% 
-  summarize(All.total = mean(All.total*pop.scaling.factor)) %>% 
-  arrange(Age_bin, Tr_year_binned) %>% 
-  filter(Age_bin == 15)
-  
-```
-
-```{r}
-dat.transm.all.list %>% select(Tr_year_binned, Age_bin, All.total, sim.id) %>% 
-  filter(Age_bin == 20) %>% 
-  inner_join(
-    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
-    by = c("sim.id")
-  ) %>% 
-  group_by(Tr_year_binned, Age_bin) %>% 
-  summarize(All.total = mean(All.total * pop.scaling.factor), .groups = 'keep')
-```
-
-
-```{r}
-dat.transm.list %>% 
-  select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total, sim.id) %>%
-  mutate(All.total =  Undiagnosed.total + Diagnosed_noART.total + OnART.VL.Supp.total + OnART.VL.NoSupp.total + DropOut.total) %>% 
-  filter(Age_bin == 20) %>% 
-  inner_join(
-    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
-    by = c("sim.id")
-  ) %>% 
-  group_by(Tr_year_binned, Age_bin) %>% 
-  summarize(All.total = mean(All.total * pop.scaling.factor), .groups = 'keep')
-```
-
-
-```{r}
-dat.transm.list %>% group_by(Tr_year_binned, Age_bin) %>% 
-  summarize(Undiagnosed.total = mean(Undiagnosed.total*pop.scaling.factor))
-```
-
-
-```{r}
-dat.transm.list %>% 
-  select(Tr_year_binned, Age_bin, Undiagnosed.total, Diagnosed_noART.total, OnART.VL.Supp.total, OnART.VL.NoSupp.total, DropOut.total, sim.id) %>%
-  mutate(All.total =  Undiagnosed.total + Diagnosed_noART.total + OnART.VL.Supp.total + OnART.VL.NoSupp.total + DropOut.total) %>% 
-  filter(Age_bin == 20) %>% 
-  inner_join(
-    sim.results.pop.scaling %>% select(pop.scaling.factor, sim.id = sim.id.ix),
-    by = c("sim.id")
-  ) %>% 
-  group_by(Tr_year_binned, Age_bin) %>% 
-  summarize(Undiagnosed.total = mean(Undiagnosed.total * pop.scaling.factor), .groups = 'keep')
-```
-
-New suggested figure: breakdown of transmission events by age
