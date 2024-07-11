@@ -2889,7 +2889,27 @@
 			}
 		}
 	},
-  {
+	{
+		"Event_Name": "OnART: switch ARTStatus on",
+		"class": "CampaignEventByYear",
+		"Nodeset_Config": { "class": "NodeSetAll" },
+		"Start_Year": 1990,
+		"Event_Coordinator_Config": {
+			"class": "StandardInterventionDistributionEventCoordinator",
+                "Intervention_Config":{
+                    "class":"NodeLevelHealthTriggeredIV",
+                    "Trigger_Condition_List": [
+                        "OnART1"
+                    ],
+                    "Actual_IndividualIntervention_Config": {
+                        "class": "PropertyValueChanger",
+                        "Target_Property_Key":"ARTStatus",
+                        "Target_Property_Value":"OnART"
+					}
+                }
+		}
+	},
+  	{
           "class": "CampaignEventByYear",
           "Event_Name": "OnART: state 2 (delay to dropout)",
           "Start_Year": 1990,
@@ -2932,7 +2952,27 @@
 			}
 		}
 	},
-  {
+	{
+		"Event_Name": "OnART: switch ARTStatus off",
+		"class": "CampaignEventByYear",
+		"Nodeset_Config": { "class": "NodeSetAll" },
+		"Start_Year": 1990,
+		"Event_Coordinator_Config": {
+			"class": "StandardInterventionDistributionEventCoordinator",
+                "Intervention_Config":{
+                    "class":"NodeLevelHealthTriggeredIV",
+                    "Trigger_Condition_List": [
+                        "OnART3"
+                    ],
+                    "Actual_IndividualIntervention_Config": {
+                        "class": "PropertyValueChanger",
+                        "Target_Property_Key":"ARTStatus",
+                        "Target_Property_Value":"OffART"
+					}
+                }
+		}
+	},
+  	{
       "class": "CampaignEventByYear",
       "Event_Name": "OnART: state 4 (Willing to re-enroll in ART?)",
       "Start_Year": 1990,
