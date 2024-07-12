@@ -11,7 +11,6 @@ The purpose of this notebook is to figure out how to examine the transmission ev
 
 ```{r Load libraries}
 library(tidyverse)
-library(tidyr)
 library(data.table)
 library(magrittr)
 library(ggplot2)
@@ -1375,25 +1374,86 @@ Age groups
 * 35+
 
 Issue is that before I was counting transmissions. Now I need to count people.
+
+```{r}
+input_path = "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/MWI_transmission/Baseline-campaign_Malawi_20220422_recalib-transmission_ARTStatus/ReportHIVByAgeAndGender/"
+
+sim.results.artstatus <- EMODAnalyzeR::read.simulation.results(
+  results_path = input_path,
+  scenario_name = 'baseline',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Tested.Past.Year.or.On_ART", "Tested.Ever","Diagnosed" ),
+  stratify_columns = c("Year", "Gender", "Age", "IP_Key.ARTStatus"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+CENSUS_YEAR = 2018.5
+MALAWI_CENSUS_POP = 17563749
+
+sim.results.pop.scaling <- sim.results.artstatus %>% 
+      filter(Year == CENSUS_YEAR) %>%
+      group_by(sim.id) %>%
+      summarize(total.pop = sum(Population), .groups = 'keep') %>% 
+      mutate(pop.scaling.factor = MALAWI_CENSUS_POP/total.pop)
+
+sim.results.pop.scaling$sim.id.ix <- 1:nrow(sim.results.pop.scaling)
+
+sim.results.artstatus <- sim.results.artstatus %>% 
+  inner_join(
+    sim.results.pop.scaling,
+    by = c("sim.id")
+  )
+
+```
+
+Check: anyone on art who is naive
+```{r}
+sim.results.artstatus %>% filter(IP_Key.ARTStatus == "ARTNaive") %>% 
+  summarize(sum(On_ART))
+```
+
+Check: anyone on art who is not literally on art
+```{r}
+sim.results.artstatus %>% filter(IP_Key.ARTStatus != "OnART") %>% 
+  summarize(sum(On_ART))
+```
+
+Check: anyone off art who is literally on art
+
+```{r}
+sim.results.artstatus %>% filter(IP_Key.ARTStatus == "OffART") %>% 
+  summarize(sum(On_ART))
+```
+Check: does the number of people counted by OnART column equal the number of people IP=OnART?
+```{r}
+sim.results.artstatus %>% filter(IP_Key.ARTStatus == "OnART") %>% 
+  summarize(Pop = sum(Population),
+            OnART = sum(On_ART))
+```
+
+
 #### Counting undiagnosed
 ```{r}
-dat.undiagnosed <- sim.results %>% group_by(Year, Gender, Age, sim.ix) %>% 
-  summarize(Population = sum(Population * pop.scaling.factor),
-            Infected = sum(Infected * pop.scaling.factor),
-            Diagnosed = sum(Diagnosed * pop.scaling.factor)) %>% 
-  group_by(Year, Gender, Age) %>% 
-  summarize(Population = mean(Population),
-            Infected = mean(Infected),
-            Diagnosed = mean(Diagnosed)) %>% 
-  ungroup() %>% 
-  mutate(Undiagnosed = Infected - Diagnosed)
-
-dat.undiagnosed %>% head
+# dat.undiagnosed <- sim.results.artstatus %>% group_by(Year, Gender, Age, sim.ix) %>% 
+#   summarize(Population = sum(Population * pop.scaling.factor),
+#             Infected = sum(Infected * pop.scaling.factor),
+#             Diagnosed = sum(Diagnosed * pop.scaling.factor)) %>% 
+#   group_by(Year, Gender, Age) %>% 
+#   summarize(Population = mean(Population),
+#             Infected = mean(Infected),
+#             Diagnosed = mean(Diagnosed)) %>% 
+#   ungroup() %>% 
+#   mutate(Undiagnosed = Infected - Diagnosed)
+# 
+# dat.undiagnosed %>% head
 ```
 
 #### Counting On ART
 ```{r}
-dat.onart <- sim.results %>% group_by(Year, Gender, Age, sim.ix) %>% 
+dat.onart <- sim.results.artstatus %>% group_by(Year, Gender, Age, sim.ix) %>% 
   summarize(On_ART = sum(On_ART * pop.scaling.factor)) %>% 
   group_by(Year, Gender, Age) %>% 
   summarize(On_ART = mean(On_ART), .groups = 'keep') %>% 
@@ -1402,62 +1462,102 @@ dat.onart <- sim.results %>% group_by(Year, Gender, Age, sim.ix) %>%
 dat.onart
 ```
 
+#### Counting ART Naive Diagnosed individuals
+
+```{r}
+dat.artnaive <- sim.results.artstatus %>% filter(IP_Key.ARTStatus == "ARTNaive") %>%
+  group_by(Year, Gender, Age, sim.ix) %>% 
+  summarize(Diagnosed.ArtNaive = sum(Diagnosed* pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(Diagnosed.ArtNaive = mean(Diagnosed.ArtNaive), .groups = 'keep')
+```
+
 #### Counting Off ART
 
-At least one interruption
-
-
-
-
 ```{r}
-art.report.dropout <- art.report %>% 
-    arrange(Year) %>% 
-    group_by(Individual_ID, event) %>% 
-    mutate(event_ix = row_number())
-# pair each dropout event with the subsequent art init event
-art.report.dropout[which(art.report.dropout$event == 'DropOut'),]$event_ix =
-  art.report.dropout[which(art.report.dropout$event == 'DropOut'),]$event_ix +1
-
-art.report.dropout %>% 
-  full_join(art.report.dropout$Year, by = Year)
-
-cross_join(
-  data.table(Year.round = c(2001:2047)), 
-  art.report.dropout
-) %>% View
-
-# In any given year, how many individuals have *most recently* initiated ART?
-art.report.dropout$Year %>% unique 
-
-art.report.dropout %>% group_by(Year) %>% slice(1) %>% View
-
-# In any given year, how many individuals have *most recently* dropped out of ART?
+dat.art.dropout <- sim.results.artstatus %>% filter(IP_Key.ARTStatus == "OffART") %>%
+  group_by(Year, Gender, Age, sim.ix) %>% 
+  summarize(ArtDropout = sum(Population * pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(ArtDropout = mean(ArtDropout), .groups = 'keep')
 
 ```
 
+#### Undiagnosed
 
 ```{r}
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-mort___2023_11_06_21_47_46_089549/"
 
-sim.results.mort <- EMODAnalyzeR::read.simulation.results.bigpurple(
-  experiment_path = input_path,
-  scenario_name = 'baseline',
-  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
-                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
-                        "Tested.Past.Year.or.On_ART", "Tested.Ever","Diagnosed" ),
-  stratify_columns = c("Year", "Gender", "Age"),
-  min_age_inclusive = 0,
-  max_age_inclusive = 99
-) %>% 
-  ungroup()
+dat.plhiv <- sim.results.artstatus %>% 
+  group_by(Year, Gender, Age, sim.ix) %>% 
+  summarize(PLHIV = sum(Infected * pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(PLHIV = mean(PLHIV), .groups = 'keep')
+
+
+dat <- merge(
+    dat.plhiv,
+    dat.artnaive,
+    by = c("Year", "Gender", "Age")
+  ) %>% 
+  merge(dat.onart,
+        by = c("Year", "Gender", "Age")) %>% 
+  merge(dat.art.dropout,
+        by = c("Year", "Gender", "Age")) %>%
+  mutate(Undiagnosed = PLHIV - Diagnosed.ArtNaive - On_ART - ArtDropout)
+
+
+```
+
+#### Write out 
+
+```{r}
+write_excel_csv(dat, "mihpsa_art_status.csv")
+```
+
+
+#### Checks
+
+Check to see if undiagnosed + art naive + on art + art dropout all add up to total PLHIV
+
+```{r}
+
+  
 ```
 
 ```{r}
-sim.results %>% filter(sim.ix == 2)
+
+
+dat %>%
+  mutate(tot = (Undiagnosed + Diagnosed.ArtNaive + On_ART+ ArtDropout )) %>% 
+  mutate(diff = PLHIV - tot) %>% View
+
 ```
 
+Check: does the number of Naive, On Art, Off art people equal the number infected?
 
 ```{r}
-sim.results.mort %>% filter(sim.ix == 2)
+sim.results.artstatus %>% 
+  pivot_wider(
+    id_cols = c("Year", "Gender", "Age", "sim.ix"),
+    names_from = IP_Key.ARTStatus,
+    values_from = Infected
+  )
+```
+
+Check: total numbers infected are the same across both sim versions?
+
+```{r}
+dat.plhiv.old <- sim.results %>% 
+  group_by(Year, Gender, Age, sim.ix) %>% 
+  summarize(PLHIV = sum(Infected * pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(PLHIV = mean(PLHIV), .groups = 'keep')
+
+merge(
+  dat.plhiv.old %>% select(Year, Gender, Age, PLHIVold= PLHIV),
+  dat.plhiv %>% select(Year, Gender, Age, PLHIVnew= PLHIV),
+  by = c("Year", "Gender", "Age")) %>% 
+  mutate(diff = PLHIVold - PLHIVnew) %>% 
+  .$diff %>% summary
 ```
 
