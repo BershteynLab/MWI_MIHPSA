@@ -16,10 +16,8 @@ The secondary purpose of this notebook will be to produce example scripts which 
 
 ```{r Load libraries}
 library(tidyverse)
-library(tidyr)
 library(data.table)
 library(magrittr)
-library(ggplot2)
 library(devtools)
 devtools::install_github("BershteynLab/EMODAnalyzeR")
 ```
@@ -29,7 +27,7 @@ devtools::install_github("BershteynLab/EMODAnalyzeR")
 sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   #experiment_path = "/gpfs/scratch/citrod01/experiments/Malawi--0.01--rep3--test2_iter20___2022_04_09_05_03_57_150118",
   #experiment_path = "/gpfs/scratch/citrod01/experiments/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_12_18_14_09_084274",
-  experiment_path = "/gpfs/scratch/citrod01/experiments/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_13_18_51_19_742598",
+  experiment_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_13_14_14_43_389706",
   scenario_name = 'baseline',
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
@@ -46,7 +44,8 @@ sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
 ```
 
 
-# Population rescaling factor
+# Population rescaling
+
 Need to scale up everything, for rescaling extensible variables
 ```{r Population rescaling factor}
 CENSUS_YEAR = 2018.5
@@ -625,6 +624,107 @@ circumcision.summary  %>%
   pivot_wider(names_from = Year, values_from = value)
 ```
 
+# YLLs
+
+This is leftover from the Zimbabwe calculations, so will need to adapt
+
+For all individuals who died from HIV at age X, find the correct life expectancy for that individual
+Then sum up the difference between the age of death and the life expectancy
+
+```{r Load Life Expectancy Tables}
+
+xl.path <- "/gpfs/data/bershteynlab/EMOD/citrod01/ZWE_calib_20220627/Analysis/YLL_Tables.xlsx"
+
+le.table.undisc <- readxl::read_excel(xl.path, sheet = "Undiscounted", range = "A1:C93", col_names = TRUE)
+colnames(le.table.undisc) <- c("Age", 1, 0)
+le.table.undisc <- pivot_longer(
+  le.table.undisc, 
+  cols = c(`0`,`1`),
+  names_to = c("Gender"),
+  values_to = "YLL")
+```
+
+```{r}
+# Future YLL incurred at calendar year of death for adults aged 15+
+
+# aggregate up the number of HIV related deaths for each age group
+
+data.yll.base <- sim.results.base %>% 
+  dplyr::select(Year, Age, Gender, Died_from_HIV, sim.id, pop.scaling.factor) %>% 
+  group_by(Year, Gender, Age, sim.id) %>% 
+  # count total number of people who have died from HIV, 
+  # for each year, age, gender and simulation
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  ungroup() %>% 
+  # merge with YLL table
+  merge(le.table.undisc, 
+        by = c("Age", "Gender"))
+
+yll.adults <- data.yll.base  %>%   
+  # subset on adults
+  filter(Age >= 15) %>% 
+  # calculate total YLLs for each year/age/gender group
+  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
+  # sum YLLs across age/gender
+  group_by(Year, sim.id) %>% 
+  summarize(total.YLLs = sum(total.YLLs), .groups = 'keep') %>% 
+  # average YLLs across simulation runs
+  group_by(Year) %>%
+  summarize(YLL_AgeGenLifeExpect_A1599_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
+
+
+yll.children <- data.yll.base  %>%   
+  # subset on children
+  filter(Age < 15) %>% 
+  # calculate total YLLs for each year/age/gender group
+  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
+  # sum YLLs across age/gender
+  group_by(Year, sim.id) %>% 
+  summarize(total.YLLs = sum(total.YLLs), .groups = 'keep') %>% 
+  # average YLLs across simulation runs
+  group_by(Year) %>%
+  summarize(YLL_AgeGenLifeExpect_A014_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
+  
+discount.percent = .03
+discount_start_year = 2024
+
+yll.adults.disc <- data.yll.base  %>%   
+  # subset on adults
+  filter(Age >= 15) %>% 
+  # calculate total YLLs for each year/age/gender group
+  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
+  # calculate discount factor
+  mutate(discount.factor = case_when(Year <= 2024 ~ 1,
+                                     Year > 2024 ~ (1 - discount.percent)^(Year - discount_start_year))) %>% 
+  # sum YLLs across age/gender
+  group_by(Year, sim.id) %>% 
+  summarize(total.YLLs = sum(total.YLLs * discount.factor), .groups = 'keep') %>% 
+  # average YLLs across simulation runs
+  group_by(Year) %>%
+  summarize(YLL_AgeGenLifeExpect_3Disc_A1599_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
+
+
+yll.children.disc <- data.yll.base  %>%   
+  # subset on adults
+  filter(Age < 15) %>% 
+  # calculate total YLLs for each year/age/gender group
+  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
+  # calculate discount factor
+  mutate(discount.factor = case_when(Year <= 2024 ~ 1,
+                                     Year > 2024 ~ (1 - discount.percent)^(Year - discount_start_year))) %>% 
+  # sum YLLs across age/gender
+  group_by(Year, sim.id) %>% 
+  summarize(total.YLLs = sum(total.YLLs * discount.factor), .groups = 'keep') %>% 
+  # average YLLs across simulation runs
+  group_by(Year) %>%
+  summarize(YLL_AgeGenLifeExpect_3Disc_A014_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
+
+
+ylls.current.base <- merge(yll.adults, yll.children, by = 'Year') %>% 
+  merge(yll.adults.disc, by = 'Year') %>% 
+  merge(yll.children.disc, by = 'Year')
+```
+
 # Save everything as a csv:
 ```{r Output as csv}
 rbind(pop.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # population
@@ -977,6 +1077,79 @@ oac.plot <- ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 oac.plot
+
+```
+
+## VMMC 
+
+```{r}
+circumcision.summary %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = mean.fraction.circumcised))
+```
+
+
+```{r}
+vmmc.count = sim.results %>% 
+  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, Age < 50, ceiling(Year) != Year, IsCircumcised == 1) %>% 
+  group_by(Year, sim.ix) %>% 
+  summarize(Population = sum(Population* pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(Population = mean(Population))
+
+vmmc.count %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Population))
+
+vmmc.count = sim.results %>% 
+  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age < 50, ceiling(Year) != Year, IsCircumcised == 1, Year < 2010) %>% 
+  group_by(Year, sim.ix) %>% 
+  summarize(Population = sum(Population* pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(Population = mean(Population))
+
+vmmc.count %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Population))  
+
+```
+## HIV Testing
+
+```{r}
+test.total.counts <- data.table(
+  Year = c(2019, 2020, 2021, 2022, 2023),
+  tests = c(4060211,	2737333,	2653001,	3006284,	3404438)
+)
+
+total.tests.summary %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = mean.Total.Tests)) + 
+  geom_point(data = test.total.counts, 
+             mapping = aes(x = Year, y = tests))
+```
+### ANC Tests
+```{r}
+
+anc.total.counts <- data.table(
+  Year = c(2019, 2020, 2021, 2022, 2023),
+  tests = c(578497,	575150, 587323,	633819, 693486)
+)
+
+anc.summary = sim.results %>% 
+  mutate(ANC = HIV_Positive_at_ANC + HIV_Negative_at_ANC_NULL) %>% 
+  filter(Gender == 1, Year > 1999) %>% 
+  group_by(Year, sim.ix) %>% 
+  summarize(ANC = sum(ANC * pop.scaling.factor)) %>% 
+  group_by(Year) %>% 
+  summarize(ANC = mean(ANC)) 
+
+ggplot() + 
+  geom_line(data = anc.summary,
+            mapping = aes(x = Year, y = ANC)) + 
+  geom_point(data = anc.total.counts, 
+             mapping = aes(x = Year, y = tests))
 
 ```
 
