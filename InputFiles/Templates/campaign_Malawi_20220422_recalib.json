@@ -36,16 +36,15 @@
     },
 	{
 		"COMMENT": "Assume people without the intervention are Accessibility:No - people not set to Yes when born - the other 20%.",
-		"class": "CampaignEventByYear",
-		"Start_Year": 2010,
-		"Nodeset_Config": {
-			"class": "NodeSetAll"
-		},
 		"Event_Coordinator_Config": {
-			"class": "ReferenceTrackingEventCoordinatorTrackingConfig",
 			".class": "ReferenceTrackingEventCoordinatorHIV",
 			"End_Year": 2099,
-			"Update_Period": 30.4166667,
+			"Intervention_Config": {
+				"New_Property_Value": "",
+				"Target_Property_Key": "Accessibility",
+				"Target_Property_Value": "Yes",
+				"class": "PropertyValueChanger"
+			},
 			"Target_Demographic": "Everyone",
 			"Time_Value_Map": {
 				"Times": [
@@ -60,16 +59,18 @@
 				]
 			},
 			"Tracking_Config": {
-					"class": "HasIP",
-					"Is_Equal_To": 1,
-					"IP_Key_Value": "Accessibility:Yes"
+				"IP_Key_Value": "Accessibility:Yes",
+				"Is_Equal_To": 1,
+				"class": "HasIP"
 			},
-			"Intervention_Config": {
-				"class": "PropertyValueChanger",
-				"Target_Property_Key" : "Accessibility",
-				"Target_Property_Value" : "Yes"
-			}
-		}
+			"Update_Period": 30.4166667,
+			"class": "ReferenceTrackingEventCoordinatorTrackingConfig"
+			},
+		"Nodeset_Config": {
+			"class": "NodeSetAll"
+		},
+		"Start_Year": 2010,
+		"class": "CampaignEventByYear"
 	},
     {
 		"Event_Name": "Will ever become female sex worker (FSW) in Central",
@@ -149,7 +150,7 @@
 					"Disqualifying_Properties": [],
 					"Event_Or_Config": "Event",
 					"New_Property_Value": "",
-					"Delay_Distribution": "UNIFORM_DURATION",
+					"Delay_Period_Distribution": "UNIFORM_DISTRIBUTION",
 					"Delay_Period_Min": 0,
 					"Delay_Period_Max": 1825
 				}
@@ -194,9 +195,9 @@
 					"Event_Or_Config": "Event",
 					"New_Property_Value": "",
 					"Broadcast_Event": "Commercial_Dropout",
-					"Delay_Distribution": "WEIBULL_DURATION",
-					"Delay_Period_Scale": 2215,
-					"Delay_Period_Shape": 3.312
+					"Delay_Period_Distribution": "WEIBULL_DISTRIBUTION",
+					"Delay_Period_Kappa": 3.312,
+					"Delay_Period_Lambda": 2215
 				}
 			}
 		}
@@ -329,9 +330,9 @@
 					"Event_Or_Config": "Event",
 					"New_Property_Value": "",
 					"Broadcast_Event": "Commercial_Uptake",
-					"Delay_Distribution": "UNIFORM_DURATION",
-					"Delay_Period_Min": 0,
-					"Delay_Period_Max": 3650
+					"Delay_Period_Distribution": "UNIFORM_DISTRIBUTION",
+					"Delay_Period_Max": 3650,
+					"Delay_Period_Min": 0
 				}
 			}
 		}
@@ -354,9 +355,9 @@
 					"Event_Or_Config": "Event",
 					"New_Property_Value": "",
 					"Broadcast_Event": "Commercial_Dropout",
-					"Delay_Distribution": "UNIFORM_DURATION",
-					"Delay_Period_Min": 730,
-					"Delay_Period_Max": 10950
+					"Delay_Period_Distribution": "UNIFORM_DISTRIBUTION",
+					"Delay_Period_Max": 10950,
+					"Delay_Period_Min": 730
 				}
 			}
 		},
@@ -1740,8 +1741,8 @@
 					"New_Property_Value": "InterventionStatus:HCTUptakePostDebut",
 					"Max_Entries": 1,
 					"Broadcast_Event": "HCTUptakePostDebut2",
-					"Delay_Distribution": "EXPONENTIAL_DURATION",
-					"Delay_Period": 365,
+					"Delay_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
+					"Delay_Period_Exponential": 365,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
 						"InterventionStatus:OnART",
@@ -1837,8 +1838,8 @@
 					"Muxer_Name": "HCTTestingLoop",
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Broadcast_Event": "HCTTestingLoop1",
-					"Delay_Distribution": "EXPONENTIAL_DURATION",
-					"Delay_Period": 365,
+					"Delay_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
+					"Delay_Period_Exponential": 365,
 					"Max_Entries": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
@@ -2380,8 +2381,8 @@
 					"Muxer_Name": "ARTStaging",
 					"New_Property_Value": "InterventionStatus:ARTStaging",
 					"Max_Entries": 1,
-					"Delay_Distribution": "FIXED_DURATION",
-					"Delay_Period": 1,
+					"Delay_Period_Distribution": "CONSTANT_DISTRIBUTION",
+					"Delay_Period_Constant": 1,
 					"Broadcast_Event": "ARTStaging3",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
@@ -2598,8 +2599,8 @@
 					"Muxer_Name": "PreART",
 					"Max_Entries": 1,
 					"New_Property_Value": "InterventionStatus:OnPreART",
-					"Delay_Distribution": "FIXED_DURATION",
-					"Delay_Period": 182,
+					"Delay_Period_Distribution": "CONSTANT_DISTRIBUTION",
+					"Delay_Period_Constant": 182,
 					"Broadcast_Event": "OnPreART1",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
@@ -2807,9 +2808,9 @@
 					
 					"Broadcast_Event": "OnART1",
 					"New_Property_Value": "InterventionStatus:OnART",
-					"Delay_Distribution": "UNIFORM_DURATION",
-					"Delay_Period_Min": 1,
+					"Delay_Period_Distribution": "UNIFORM_DISTRIBUTION",
 					"Delay_Period_Max": 120,
+					"Delay_Period_Min": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever"
 					]
@@ -2872,8 +2873,8 @@
                       "class": "HIVMuxer",
                       "Muxer_Name": "ARTDropoutDelay",
                       "Broadcast_Event": "OnART3",
-                      "Delay_Distribution": "EXPONENTIAL_DURATION",
-                      "Delay_Period": 2051,
+					  "Delay_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
+                      "Delay_Period_Exponential": 2051,
                       "Max_Entries": 1,
                       "Disqualifying_Properties": [
                           "InterventionStatus:LostForever"
