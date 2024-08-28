@@ -15,3 +15,8 @@ MWI_test/
 MWI_resample/
 MWI_transmission/
 .Rproj.user
+
+slurm_*
+Analysis/.RData
+Analysis/.Rhistory
+Analysis/Analysis.Rproj
