@@ -24,20 +24,29 @@ devtools::install_github("BershteynLab/EMODAnalyzeR")
 
 # Read in simulation stuff
 ```{r}
+
+#input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_13_14_14_43_389706"
+#experiment_path = "/gpfs/scratch/citrod01/experiments/Malawi--0.01--rep3--test2_iter20___2022_04_09_05_03_57_150118",
+#experiment_path = "/gpfs/scratch/citrod01/experiments/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_12_18_14_09_084274",
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-MWI_Base___2024_09_01_16_12_22_555024"
+
 sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
-  #experiment_path = "/gpfs/scratch/citrod01/experiments/Malawi--0.01--rep3--test2_iter20___2022_04_09_05_03_57_150118",
-  #experiment_path = "/gpfs/scratch/citrod01/experiments/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_12_18_14_09_084274",
-  experiment_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_13_14_14_43_389706",
-  scenario_name = 'baseline',
+  experiment_path = input_path,
+  scenario_name = 'minimal',
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
                         "Tested.Past.Year.or.On_ART", "Tested.Ever","Diagnosed",
-                        "HCTTestingLoop1","ARTStaging9","HCTTestingLoop0",
-                        "Needs_PMTCT_Diagnostic_Test","HIV_Positive_at_ANC","HIV_Negative_at_ANC_NULL",
-                        "ARTStaging0","ARTStaging1","ARTStaging_Negative_NULL"),
-  stratify_columns = c("Year", "Gender", "Age","IP_Key.Risk","IsCircumcised"),
+                        "Infected.CD4.Under.200..Not.On.ART.", "Infected.CD4.200.To.349..Not.On.ART.",
+                        "Infected.CD4.350.To.499..Not.On.ART.", "Infected.CD4.500.Plus..Not.On.ART.",
+                        "ARTStaging9","HCTTestingLoop0",
+                         "Program_VMMC","Traditional_MC"
+                        ), # need to add "GaveBirth"
+                          # "HCTTestingLoop1","Needs_PMTCT_Diagnostic_Test","HIV_Positive_at_ANC",
+                          # "HIV_Negative_at_ANC_NULL","ARTStaging0","ARTStaging1","ARTStaging_Negative_NULL",
+  stratify_columns = c("Year", "Gender", "Age"), # Need to add "On_Art_Dim", "HasHIV"; unsure if I need "IP_Key.Risk",  "IsCircumcised"
   min_age_inclusive = 0,
-  max_age_inclusive = 99
+  max_age_inclusive = 99,
+  verbose = TRUE
 ) %>% 
   ungroup()
 
@@ -64,51 +73,425 @@ sim.results <- sim.results %>%
   )
 ```
 
+# Flows
 
-# Population
-I am going to make the choice to use the half-year points to mark population
-```{r Population}
-# Males 15+ 
+## Births
+
+```{r}
+# p0 <- sim.results %>% 
+#   dplyr::select(Year, Gender, Age, GaveBirth, sim.ix, pop.scaling.factor) %>%
+#   filter(Gender == 1, Age > 15, ceiling(Year) != Year) %>% 
+#   group_by(Year, sim.ix) %>% 
+#   # remember to rescale by population scaling factor!
+#   summarize(GaveBirth = sum(GaveBirth*pop.scaling.factor), .groups = 'keep') %>% 
+#   group_by(Year) %>% 
+#   summarize(N_BirthAll = mean(GaveBirth), .groups = 'keep')
+# 
+# p1 <- sim.results %>% 
+#   dplyr::select(Year, Gender, Age, GaveBirth, sim.ix, pop.scaling.factor) %>%
+#   filter(Gender == 1, Age > 15, ceiling(Year) != Year, HasHIV == 1) %>% 
+#   group_by(Year, sim.ix) %>% 
+#   # remember to rescale by population scaling factor!
+#   summarize(GaveBirth = sum(GaveBirth*pop.scaling.factor), .groups = 'keep') %>% 
+#   group_by(Year) %>% 
+#   summarize(N_BirthAll = mean(GaveBirth), .groups = 'keep')
+# 
+# p2 <- sim.results %>% 
+#   dplyr::select(Year, Gender, Age, GaveBirth, sim.ix, pop.scaling.factor) %>%
+#   filter(Gender == 1, Age > 15, ceiling(Year) != Year, HasHIV == 1, On_Art_Dim == 1) %>% 
+#   group_by(Year, sim.ix) %>% 
+#   # remember to rescale by population scaling factor!
+#   summarize(GaveBirth = sum(GaveBirth*pop.scaling.factor), .groups = 'keep') %>% 
+#   group_by(Year) %>% 
+#   summarize(N_BirthAll = mean(GaveBirth), .groups = 'keep')
+```
+
+## New HIV Infections
+
+```{r}
+# Children 
 p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_00_14_C = mean(Newly.Infected), .groups = 'keep')
+
+# Males 15-24
+p2 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, Age < 25) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_15_24_M = mean(Newly.Infected), .groups = 'keep')
+
+# Females 15-24
+p3 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, Age < 25) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_15_24_F = mean(Newly.Infected), .groups = 'keep')
+
+# Males 25-49
+p4 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 25, Age < 50) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_25_49_M = mean(Newly.Infected), .groups = 'keep')
+
+# Females 25-49
+p5 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 25, Age < 50) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_25_49_F = mean(Newly.Infected), .groups = 'keep')
+
+# Males 50+
+p6 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 50) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_50_UP_M = mean(Newly.Infected), .groups = 'keep')
+
+# Females 50+ 
+p7 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Newly.Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 50) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewHIV_50_UP_F = mean(Newly.Infected), .groups = 'keep')
+
+inc.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  merge(p5, by = 'Year') %>%
+  merge(p6, by = 'Year') %>%
+  merge(p7, by = 'Year') %>%
+  mutate(Year = floor(Year))
+
+inc.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## Deaths
+
+```{r}
+## Died from HIV
+
+# Children 
+p1 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsHIV_00_14_C = mean(Died_from_HIV), .groups = 'keep')
+
+# Males 15+
+p2 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsHIV_15_UP_M = mean(Died_from_HIV), .groups = 'keep')
+
+# Females 15+
+p3 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsHIV_15_UP_F = mean(Died_from_HIV), .groups = 'keep')
+
+## All deaths
+
+# Children 
+p4 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsAll_00_14_C = mean(Died), .groups = 'keep')
+
+# Males 15+
+p5 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsAll_15_UP_M = mean(Died), .groups = 'keep')
+
+# Females 15+
+p6 <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_DeathsAll_15_UP_F = mean(Died), .groups = 'keep')
+
+
+deaths.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  merge(p5, by = 'Year') %>%
+  merge(p6, by = 'Year') %>%
+  mutate(Year = floor(Year))
+
+deaths.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+
+```
+
+## YLLs
+
+Note that this is YLL attributable to HIV, not all YLLs
+
+```{r}
+dle.table <- read_csv("/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/MIHPSA_MWI_YLL_DLE_table.csv")
+
+dle.table <- dle.table %>% 
+  pivot_longer(cols = c("Male", "Female"), values_to = "dle") %>%
+  mutate(Gender = case_when(name == "Male" ~ 0,
+                            name == "Female" ~ 1)) %>%
+  select(Age, Gender, dle)
+```
+
+```{r}
+deaths.ylls <- sim.results %>%
+  mutate(Year = ceiling(Year)) %>% 
+  group_by(Year, Gender, Age, Died_from_HIV, sim.ix) %>% 
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor)) %>% 
+  group_by(Year, Gender, Age) %>% 
+  summarize(Died_from_HIV = mean(Died_from_HIV))
+
+ylls.under.15 <- deaths.ylls %>%
+  filter(Age < 15) %>% 
+  inner_join(dle.table,
+             by = c("Age", "Gender")) %>% 
+  mutate(YLL = Died_from_HIV*dle) %>%
+  group_by(Year) %>% 
+  summarize(N_YLL_00_14_C = sum(YLL))
+
+ylls.15.to.80 <- deaths.ylls %>%
+  filter(Age >= 15, Age < 80) %>% 
+  inner_join(dle.table,
+             by = c("Age", "Gender")) %>% 
+  mutate(YLL = Died_from_HIV*dle) %>%
+  group_by(Year, Gender) %>% 
+  summarize(YLL = sum(YLL))
+
+ylls.over.80 <- deaths.ylls %>%
+  filter(Age >= 80) %>% 
+  inner_join(dle.table %>% filter(Age >= 80),
+             by = c("Gender")) %>% 
+  mutate(YLL = Died_from_HIV*dle) %>%
+  group_by(Year, Gender) %>% 
+  summarize(YLL.80 = sum(YLL))
+
+# Add together ylls over 15 by gender
+
+ylls.summary <- merge(ylls.15.to.80, ylls.over.80,
+      by = c("Year", "Gender")) %>% 
+  mutate(YLL.tot = YLL + YLL.80) %>% 
+  mutate(Gender = case_when(Gender == 0 ~ "N_YLL_15_UP_M",
+                            Gender == 1 ~ "N_YLL_15_UP_F")) %>% 
+  select(Year, Gender, YLL.tot) %>% 
+  pivot_wider(id_cols = c(Year),
+              values_from = c(YLL.tot),
+              names_from = c(Gender) ) %>% 
+  merge(ylls.under.15) %>% 
+  select(Year, N_YLL_00_14_C, N_YLL_15_UP_M, N_YLL_15_UP_F)
+
+ylls.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## Testing
+
+```{r}
+testing.summary <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, ARTStaging9, HCTTestingLoop0, sim.ix, pop.scaling.factor) %>%
+  filter(Age >= 15) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(N_HIVTest_Facility_NEG_15_UP = sum(HCTTestingLoop0*pop.scaling.factor), 
+            N_HIVTest_Facility_POS_15_UP = sum(ARTStaging9*pop.scaling.factor),
+            .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_HIVTest_Facility_NEG_15_UP = mean(N_HIVTest_Facility_NEG_15_UP), 
+            N_HIVTest_Facility_POS_15_UP = mean(N_HIVTest_Facility_POS_15_UP), 
+            .groups = 'keep') %>%
+  mutate(Year = floor(Year))
+
+testing.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## Prevention
+
+### VMMC
+
+```{r}
+vmmc.summary <- sim.results %>% 
+  mutate(Year = ceiling(Year)) %>% 
+  dplyr::select(Year, Gender, Age, Program_VMMC, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0) %>% 
+  group_by(Year, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Program_VMMC = sum(Program_VMMC*pop.scaling.factor),
+            .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_NewVMMC = mean(Program_VMMC), 
+            .groups = 'keep') %>%
+  mutate(Year = floor(Year))
+
+vmmc.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+
+### Oral Prep
+
+### Art Adherence Support
+
+### VL Testing
+
+### Outreach
+
+### Econ Empowerment
+
+### Sex Ed
+
+# Stocks
+
+## Population
+
+```{r}
+# Children - N_Total_00_14_C
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>% 
+  group_by(Year, sim.ix) %>% 
   # remember to rescale by population scaling factor!
   summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.pop.males = mean(Population), .groups = 'keep')
+  summarize(N_Total_00_14_C = mean(Population), .groups = 'keep')
 
-# Females 15+
-p2 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
+# Males 15-24
+p2 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
   summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.pop.females = mean(Population), .groups = 'keep')
+  summarize(N_Total_15_24_M = mean(Population), .groups = 'keep')
 
-# Children <15
-p3 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, sim.id, pop.scaling.factor) %>%
-  filter(Age < 15, ceiling(Year) != Year) %>%
-  group_by(Year, sim.id) %>% 
+# Females 15-24
+p3 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
   summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.pop.children = mean(Population), .groups = 'keep')
+  summarize(N_Total_15_24_F = mean(Population), .groups = 'keep')
 
-# Overall
-p4 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
+# Males 25-49
+p4 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
   summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.pop.overall = mean(Population), .groups = 'keep')
+  summarize(N_Total_25_49_M = mean(Population), .groups = 'keep')
+
+# Females 15-24
+p5 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_Total_25_49_F = mean(Population), .groups = 'keep')
+
+# Males 50+
+p6 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_Total_50_UP_M = mean(Population), .groups = 'keep')
+
+# Females 15-24
+p7 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  # remember to rescale by population scaling factor!
+  summarize(Population = sum(Population*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_Total_50_UP_F = mean(Population), .groups = 'keep')
 
 pop.summary <- merge(p1, p2, by = 'Year') %>% 
   merge(p3, by = 'Year') %>% 
   merge(p4, by = 'Year') %>%
-  mutate(Year = floor(Year)) 
+  merge(p5, by = 'Year') %>%
+  merge(p6, by = 'Year') %>%
+  merge(p7, by = 'Year') %>%
+  mutate(Year = floor(Year))
 
 pop.summary %>% 
   pivot_longer(-Year) %>% 
@@ -116,50 +499,80 @@ pop.summary %>%
 ```
 
 
-# PLHIV
-This is like prevalence, but without the population denominator.
-Again I am going to use the half-year points to count people living with HIV
+
+## PLHIV
 
 ```{r People living with HIV}
-# Males 15+ 
+# Children
+p0 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_PLHIV_00_14_C = mean(Infected), .groups = 'keep')
+
+# Males 15-24
 p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, Age < 25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.plhiv.males = mean(Infected), .groups = 'keep')
+  summarize(N_PLHIV_15_24_M = mean(Infected), .groups = 'keep')
 
-# Females 15+
+# Females 15-24
 p2 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, Age < 25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.plhiv.females = mean(Infected), .groups = 'keep')
+  summarize(N_PLHIV_15_24_F = mean(Infected), .groups = 'keep')
 
-# Children <15
-p3 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Age < 15, ceiling(Year) != Year) %>%
-  group_by(Year, sim.id) %>% 
+# Males 25-49
+p3 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 25, Age < 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.plhiv.children = mean(Infected), .groups = 'keep')
+  summarize(N_PLHIV_25_49_M = mean(Infected), .groups = 'keep')
 
-# Overall
+# Females 25-49
 p4 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 25, Age < 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.plhiv.overall = mean(Infected), .groups = 'keep')
+  summarize(N_PLHIV_25_49_F = mean(Infected), .groups = 'keep')
 
-plhiv.summary <- merge(p1, p2, by = 'Year') %>% 
+# Males 50+
+p5 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_PLHIV_50_UP_M = mean(Infected), .groups = 'keep')
+
+# Females 50+
+p6 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_PLHIV_50_UP_F = mean(Infected), .groups = 'keep')
+
+
+plhiv.summary <- merge(p0, p1, by = 'Year') %>% 
+  merge(p2, by = 'Year') %>% 
   merge(p3, by = 'Year') %>% 
   merge(p4, by = 'Year') %>%
+  merge(p5, by = 'Year') %>%
+  merge(p6, by = 'Year') %>%
   mutate(Year = floor(Year))
 
 plhiv.summary %>% 
@@ -167,587 +580,178 @@ plhiv.summary %>%
   pivot_wider(names_from = Year, values_from = value)
 ```
 
-# Count number of new HIV infections
-This is going to be on a per-year basis, so I will need to use a similar trick here to sum over each pair of observation points for each year. 
-This is still an absolute count, so will need to scale up the number newly infected
-```{r New Infections}
-# Males 15-49
-p1 <- sim.results %>% 
-  filter(Gender == 0, Age >=15, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
-  # rescale by population scale factor
-  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+## Diagnosed
+```{r}
+# Children
+p0 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Diagnosed, sim.ix, pop.scaling.factor) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.new.infections.males = mean(Newly.Infected), .groups = 'keep')
+  summarize(N_Diag_00_14_C = mean(Diagnosed), .groups = 'keep')
 
-# Females 15-24
-p2 <- sim.results %>% 
-  filter(Gender == 1, Age >=15, Age < 25) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
-  # rescale by population scale factor
-  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.new.infections.females.younger = mean(Newly.Infected), .groups = 'keep')
-
-# Females 25-49
-p3 <- sim.results %>% 
-  filter(Gender == 1, Age >=25, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
-  # rescale by population scale factor
-  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.new.infections.females.older = mean(Newly.Infected), .groups = 'keep')
-
-# Overall
-p4 <- sim.results %>% 
-  filter(Age >=15, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
-  # rescale by population scale factor
-  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
-  group_by(Year, sim.id) %>% 
-  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.new.infections.overall = mean(Newly.Infected), .groups = 'keep')
-
-new.inf.summary <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  merge(p4, by = 'Year') %>%
-  mutate(Year = floor(Year)) 
-
-new.inf.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# HIV-caused deaths
-Count the number of deaths from HIV
-```{r HIV-caused deaths}
-# Males 15+ 
-p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  # Rescale by population scaling factor
-  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.hivdeaths.males = mean(Died_from_HIV), .groups = 'keep')
-
-# Females 15+
-p2 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  # Rescale by population scaling factor
-  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.hivdeaths.females = mean(Died_from_HIV), .groups = 'keep')
-
-# Children <15
-p3 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
-  filter(Age < 15, ceiling(Year) != Year) %>%
-  group_by(Year, sim.id) %>% 
-  # Rescale by population scaling factor
-  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>%
-  group_by(Year) %>% 
-  summarize(mean.hivdeaths.children = mean(Died_from_HIV), .groups = 'keep')
-
-# Overall
-p4 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  # Rescale by population scaling factor
-  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>%
-  group_by(Year) %>% 
-  summarize(mean.hivdeaths.overall = mean(Died_from_HIV), .groups = 'keep')
-
-hiv.deaths.summary <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  merge(p4, by = 'Year') %>%
-  mutate(Year = floor(Year))
-
-hiv.deaths.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# All deaths
-```{r All-cause deaths}
-p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 0, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.deaths.males = mean(Died), .groups = 'keep')
-
-# Females 15+
-p2 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 1, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.deaths.females = mean(Died), .groups = 'keep')
-
-# Overall
-p3 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(mean.deaths.overall = mean(Died), .groups = 'keep')
-
-deaths.summary <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  mutate(Year = floor(Year)) 
-
-deaths.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# HIV Prevalence
-This is calculated at each time step as number infected divided by the population
-
-The MIHPSA 
-```{r Prevalence }
-# Males 15-24 
-p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(Gender == 0, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>% 
-  group_by(Year) %>% 
-  summarize(mean.prev.males.younger = mean(Prevalence), .groups = 'keep')
-  
-# Males 25-49
-p2 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(Gender == 0, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>% 
-  group_by(Year) %>% 
-  summarize(mean.prev.males.older = mean(Prevalence), .groups = 'keep')
-
-# Females 15-24
-p3 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(Gender == 1, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>% 
-  group_by(Year) %>% 
-  summarize(mean.prev.females.younger = mean(Prevalence), .groups = 'keep')
-  
-# Females 25-49
-p4 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(Gender == 1, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>% 
-  group_by(Year) %>% 
-  summarize(mean.prev.females.older = mean(Prevalence), .groups = 'keep')
-
-# Children <15
-p5 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(Age < 15, ceiling(Year) != Year) %>%
-  group_by(Year, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>%
-  group_by(Year) %>% 
-  summarize(mean.prev.children = mean(Prevalence), .groups = 'keep')
-
-# Female Sex Workers
-p6 <- sim.results %>% 
-  filter(Gender == 1, IP_Key.Risk == 'HIGH') %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(ceiling(Year) != Year) %>%
-  group_by(Year, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>%
-  group_by(Year) %>% 
-  summarize(mean.prev.fsw = mean(Prevalence), .groups = 'keep')
-
-
-# Overall
-p7 <-sim.results %>% 
-  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
-  mutate(Prevalence = Infected/Population) %>%
-  group_by(Year) %>% 
-  summarize(mean.prev.overall = mean(Prevalence), .groups = 'keep')
-
-
-prev.summary <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  merge(p4, by = 'Year') %>%
-  merge(p5, by = 'Year') %>%
-  merge(p6, by = 'Year') %>%
-  merge(p7, by = 'Year') %>%
-  mutate(Year = floor(Year)) 
-
-prev.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# HIV Incidence
-The MIHPSA report asks us to calculate the per-100-p-y incidence, but I am not clear on how to get this number out. Is the per-year calculation a per 1 person year? So maybe it's dividing this number by 100?
-
-```{r Incidence}
 # Males 15-24
 p1 <- sim.results %>% 
-  filter(Gender == 0, Age >=15, Age < 25) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  dplyr::select(Year, Gender, Age, Diagnosed, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.inc.males.younger = mean(incidence), .groups = 'keep')
-
-# Males 25-49
-p2 <- sim.results %>% 
-  filter(Gender == 0, Age >=25, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, incidence) %>% 
-  group_by(Year) %>% 
-  summarize(mean.inc.males.older = mean(incidence), .groups = 'keep')
+  summarize(N_Diag_15_UP_M = mean(Diagnosed), .groups = 'keep')
 
 # Females 15-24
-p3 <- sim.results %>% 
-  filter(Gender == 1, Age >=15, Age < 25) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, incidence) %>% 
-  group_by(Year) %>% 
-  summarize(mean.inc.females.younger = mean(incidence), .groups = 'keep')
-
-# Females 25-49
-p4 <- sim.results %>% 
-  filter(Gender == 1, Age >=25, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  dplyr::select(Year, Gender, sim.id, incidence) %>% 
-  group_by(Year) %>% 
-  summarize(mean.inc.females.older = mean(incidence), .groups = 'keep')
-
-# Overall
-p5 <- sim.results %>% 
-  filter(Age >=15, Age < 50) %>% 
-  EMODAnalyzeR::calculate.incidence() %>% 
-  # Still disaggregated by gender, so let's aggregate up
-  group_by(Year, sim.id, scenario_name) %>% 
-  summarize(Newly.Infected = sum(Newly.Infected), pop = sum(`Population - Infected`)) %>% 
-  mutate(incidence = Newly.Infected/(pop - Newly.Infected/2)) %>% 
-  dplyr::select(Year, sim.id, incidence) %>% 
-  group_by(Year) %>% 
-  summarize(mean.inc.overall = mean(incidence), .groups = 'keep')
-
-inc.summary <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  merge(p4, by = 'Year') %>%
-  merge(p5, by = 'Year') %>% 
-  mutate(Year = floor(Year)) 
-
-inc.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# PLHIV aware of their status
-This is people who have been diagnosed - will need to double-check that the "Diagnosed" column from the simulation results reflects a running total of the people who know their HIV status:
-```{r Diagnosed}
-plhiv.diagnosed.summary <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, Diagnosed, Infected, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
-            .groups = 'keep') %>% 
-  mutate(PLHIV.Diagnosed = case_when(Infected == 0 ~ 0,
-                                     Infected > 0 ~ Diagnosed/Infected) ) %>%
-  group_by(Year) %>% 
-  summarize(mean.plhiv.diagnosed = mean(PLHIV.Diagnosed), .groups = 'keep') %>% 
-  mutate(Year = floor(Year)) 
-
-plhiv.diagnosed.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# Total tests and fraction of positive tests
-Total tests performed = Newly.Tested.Positive + Newly.Tested.Negative
-Just as for incidence, I am going to have to combine everything by year. I'll create a function for doing this similar to the one that David made for incidence calculation.
-
-```{r Total Tests Performed Over Age 15}
-total.tests.summary <- sim.results %>% 
-  filter(Age >= 15) %>% 
-  EMODAnalyzeR::calculate.tests.performed(gender.breakdown = TRUE) %>% 
-  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>% 
-  group_by(Year, Gender) %>% 
-  summarize(mean.Total.Tests = mean(Total.Tests*pop.scaling.factor), .groups = 'keep') %>% 
-  mutate(Gender_labels = case_when(Gender == 0 ~ "mean.Total.Tests.males", 
-                                   Gender == 1 ~ "mean.Total.Tests.females")) %>% 
-  pivot_wider(id_cols = Year, 
-              names_from = Gender_labels,
-              values_from = mean.Total.Tests) %>% 
-  mutate(mean.Total.Tests = mean.Total.Tests.males + mean.Total.Tests.females)
-
-total.tests.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value) %>% head
-```
-
-```{r Fraction of positive tests for adults}
-
-positive.tests.summary <- sim.results %>% 
-  filter(Age > 15) %>% 
-  EMODAnalyzeR::calculate.tests.performed(gender.breakdown = FALSE) %>% 
-  group_by(Year) %>% 
-  summarize(mean.Proportion.Positive.Tests = mean(Proportion.Positive.Tests))
-
-positive.tests.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-# PLHIV on ART
-Count the number of people on art. Art coverage is the ratio between people on art and PLHIV.
-
-```{r OnART}
-# Males Age 15+
-p1 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
-            .groups = 'keep') %>% 
-  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
-                                  Infected > 0 ~ On_ART/Infected)) %>% 
-  group_by(Year) %>% 
-  summarize(mean.On_ART.males = mean(On_ART), mean.ART.coverage.males = mean(ART.coverage), .groups = 'keep')
-
-# Females Age 15+
-p2 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+p2 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Diagnosed, sim.ix, pop.scaling.factor) %>%
   filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id) %>% 
-  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
-            .groups = 'keep') %>% 
-  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
-                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.On_ART.females = mean(On_ART), mean.ART.coverage.females = mean(ART.coverage), .groups = 'keep')
+  summarize(N_Diag_15_UP_F = mean(Diagnosed), .groups = 'keep')
 
-# Children
-p3 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+diag.summary <- merge(p0, p1, by = 'Year') %>% 
+  merge(p2, by = 'Year') %>%
+  mutate(Year = floor(Year))
+
+diag.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+
+
+## OnART
+```{r}
+p0 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, sim.ix, pop.scaling.factor) %>%
   filter(Age < 15, ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
-            .groups = 'keep') %>%   
-  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
-                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.On_ART.children = mean(On_ART), mean.ART.coverage.children = mean(ART.coverage), .groups = 'keep')
+  summarize(N_ART_00_14_C = mean(On_ART), .groups = 'keep')
 
-# Total
-p4 <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
-  filter(ceiling(Year) != Year) %>% 
-  group_by(Year, sim.id) %>% 
-  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
-            .groups = 'keep') %>% 
-  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
-                                  Infected > 0 ~ On_ART/Infected)) %>% 
+# Males 15-24
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.On_ART.overall = mean(On_ART), mean.ART.coverage.overall = mean(ART.coverage), .groups = 'keep')
+  summarize(N_ART_15_UP_M = mean(On_ART), .groups = 'keep')
 
+# Females 15-24
+p2 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, sim.ix, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(N_ART_15_UP_F = mean(On_ART), .groups = 'keep')
 
-onart.data <- merge(p1, p2, by = 'Year') %>% 
-  merge(p3, by = 'Year') %>% 
-  merge(p4, by = 'Year') %>% 
-  mutate(Year = floor(Year)) 
-
-onart.summary <- onart.data %>% select(Year, mean.On_ART.males, mean.On_ART.females, mean.On_ART.children, mean.On_ART.overall)
+onart.summary <- merge(p0, p1, by = 'Year') %>% 
+  merge(p2, by = 'Year') %>% 
+  mutate(N_VLS_15_UP_M = 0.92 * N_ART_15_UP_M,
+         N_VLS_15_UP_F = 0.92 * N_ART_15_UP_F)%>%
+  mutate(Year = floor(Year))
 
 onart.summary %>% 
   pivot_longer(-Year) %>% 
   pivot_wider(names_from = Year, values_from = value)
 ```
-
-```{r Art Coverage}
-art.coverage.summary <- onart.data %>% 
-  select(Year, mean.ART.coverage.males, mean.ART.coverage.females, 
-         mean.ART.coverage.children, mean.ART.coverage.overall)
-
-art.coverage.summary %>% 
-  pivot_longer(-Year) %>% 
-  pivot_wider(names_from = Year, values_from = value)
-```
-
-
-# VMMC
-
-Fraction of males aged 15-49 who have been circumcised
-
-Given that the data only seem to count people after 2015, which is when the VMMC program started in Malawi, 
-```{r Circumcision fraction}
-circumcision.summary <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.id) %>%
-  filter(Gender == 0, Age >= 15, Age < 50, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.id, IsCircumcised) %>% 
-  summarize(Population = sum(Population), .groups = 'keep') %>% 
-  mutate(IsCircumcised.status = case_when(IsCircumcised == 0 ~ 'No', IsCircumcised == 1 ~ 'Yes')) %>% 
-  pivot_wider(id_cols = c(Year, sim.id), names_from = IsCircumcised.status, values_from = Population) %>% 
-  mutate(fraction.circumcised = Yes/(No + Yes)) %>% 
+## CD4 counts
+Assume 1/8 of people under CD4 = 200 are < 50 - we made this same assumption with MIHPSA ZWE
+```{r}
+cd4.summary <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, 
+                Infected.CD4.500.Plus..Not.On.ART., 
+                Infected.CD4.350.To.499..Not.On.ART.,
+                Infected.CD4.200.To.349..Not.On.ART.,
+                Infected.CD4.Under.200..Not.On.ART.,
+                sim.ix, pop.scaling.factor) %>%
+  filter(Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.ix) %>% 
+  summarize(Infected.CD4.500.Plus..Not.On.ART. = sum(Infected.CD4.500.Plus..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.350.To.499..Not.On.ART. = sum(Infected.CD4.350.To.499..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.200.To.349..Not.On.ART. = sum(Infected.CD4.200.To.349..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.Under.200..Not.On.ART. = sum(Infected.CD4.Under.200..Not.On.ART.*pop.scaling.factor), 
+            .groups = 'keep') %>% 
   group_by(Year) %>% 
-  summarize(mean.fraction.circumcised = mean(fraction.circumcised), .groups = 'keep') %>% 
-  mutate(Year = floor(Year)) 
+  summarize(N_PLHIV_15_UP_CD4_500_INF = mean(Infected.CD4.500.Plus..Not.On.ART.), 
+            N_PLHIV_15_UP_CD4_350_500 = mean(Infected.CD4.350.To.499..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_200_350 = mean(Infected.CD4.200.To.349..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_000_050 = 7/8*mean(Infected.CD4.Under.200..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_000_050 = 1/8*mean(Infected.CD4.Under.200..Not.On.ART.),
+            .groups = 'keep') %>% 
+  ungroup() %>%
+  mutate(Year = floor(Year))
 
-circumcision.summary  %>% 
+cd4.summary %>% 
   pivot_longer(-Year) %>% 
   pivot_wider(names_from = Year, values_from = value)
 ```
 
-# YLLs
+# Output
 
-This is leftover from the Zimbabwe calculations, so will need to adapt
+```{r}
+flows.table <- rbind(
+  inc.summary %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  deaths.summary  %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  ylls.summary %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  testing.summary  %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value)
+)
 
-For all individuals who died from HIV at age X, find the correct life expectancy for that individual
-Then sum up the difference between the age of death and the life expectancy
-
-```{r Load Life Expectancy Tables}
-
-xl.path <- "/gpfs/data/bershteynlab/EMOD/citrod01/ZWE_calib_20220627/Analysis/YLL_Tables.xlsx"
-
-le.table.undisc <- readxl::read_excel(xl.path, sheet = "Undiscounted", range = "A1:C93", col_names = TRUE)
-colnames(le.table.undisc) <- c("Age", 1, 0)
-le.table.undisc <- pivot_longer(
-  le.table.undisc, 
-  cols = c(`0`,`1`),
-  names_to = c("Gender"),
-  values_to = "YLL")
+flows.table
 ```
 
 ```{r}
-# Future YLL incurred at calendar year of death for adults aged 15+
+stocks.table <- rbind(
+  plhiv.summary %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  pop.summary  %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  diag.summary  %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  onart.summary  %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value),
+  cd4.summary %>% 
+    filter(Year >=2021, Year<=2050) %>% 
+    pivot_longer(-Year) %>% 
+    pivot_wider(names_from = Year, values_from = value)
+)
 
-# aggregate up the number of HIV related deaths for each age group
-
-data.yll.base <- sim.results.base %>% 
-  dplyr::select(Year, Age, Gender, Died_from_HIV, sim.id, pop.scaling.factor) %>% 
-  group_by(Year, Gender, Age, sim.id) %>% 
-  # count total number of people who have died from HIV, 
-  # for each year, age, gender and simulation
-  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
-  ungroup() %>% 
-  # merge with YLL table
-  merge(le.table.undisc, 
-        by = c("Age", "Gender"))
-
-yll.adults <- data.yll.base  %>%   
-  # subset on adults
-  filter(Age >= 15) %>% 
-  # calculate total YLLs for each year/age/gender group
-  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
-  # sum YLLs across age/gender
-  group_by(Year, sim.id) %>% 
-  summarize(total.YLLs = sum(total.YLLs), .groups = 'keep') %>% 
-  # average YLLs across simulation runs
-  group_by(Year) %>%
-  summarize(YLL_AgeGenLifeExpect_A1599_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
-
-
-yll.children <- data.yll.base  %>%   
-  # subset on children
-  filter(Age < 15) %>% 
-  # calculate total YLLs for each year/age/gender group
-  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
-  # sum YLLs across age/gender
-  group_by(Year, sim.id) %>% 
-  summarize(total.YLLs = sum(total.YLLs), .groups = 'keep') %>% 
-  # average YLLs across simulation runs
-  group_by(Year) %>%
-  summarize(YLL_AgeGenLifeExpect_A014_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
-  
-discount.percent = .03
-discount_start_year = 2024
-
-yll.adults.disc <- data.yll.base  %>%   
-  # subset on adults
-  filter(Age >= 15) %>% 
-  # calculate total YLLs for each year/age/gender group
-  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
-  # calculate discount factor
-  mutate(discount.factor = case_when(Year <= 2024 ~ 1,
-                                     Year > 2024 ~ (1 - discount.percent)^(Year - discount_start_year))) %>% 
-  # sum YLLs across age/gender
-  group_by(Year, sim.id) %>% 
-  summarize(total.YLLs = sum(total.YLLs * discount.factor), .groups = 'keep') %>% 
-  # average YLLs across simulation runs
-  group_by(Year) %>%
-  summarize(YLL_AgeGenLifeExpect_3Disc_A1599_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
-
-
-yll.children.disc <- data.yll.base  %>%   
-  # subset on adults
-  filter(Age < 15) %>% 
-  # calculate total YLLs for each year/age/gender group
-  mutate(total.YLLs = Died_from_HIV * YLL) %>% 
-  # calculate discount factor
-  mutate(discount.factor = case_when(Year <= 2024 ~ 1,
-                                     Year > 2024 ~ (1 - discount.percent)^(Year - discount_start_year))) %>% 
-  # sum YLLs across age/gender
-  group_by(Year, sim.id) %>% 
-  summarize(total.YLLs = sum(total.YLLs * discount.factor), .groups = 'keep') %>% 
-  # average YLLs across simulation runs
-  group_by(Year) %>%
-  summarize(YLL_AgeGenLifeExpect_3Disc_A014_M = mean(total.YLLs), .groups = 'keep') %>% ungroup()
-
-
-ylls.current.base <- merge(yll.adults, yll.children, by = 'Year') %>% 
-  merge(yll.adults.disc, by = 'Year') %>% 
-  merge(yll.children.disc, by = 'Year')
+stocks.table
 ```
 
-# Save everything as a csv:
-```{r Output as csv}
-rbind(pop.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # population
-      plhiv.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # plhiv
-      new.inf.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # new hiv infections
-      hiv.deaths.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # hiv deaths
-      deaths.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # total deaths
-      prev.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # prevalence
-      inc.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # incidence
-      plhiv.diagnosed.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # plhiv aware of their status
-      total.tests.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # total tests performed
-      positive.tests.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # positive tests performed
-      onart.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # number of plhiv on art
-      art.coverage.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # art coverage summary
-      circumcision.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value) # circumcisions
-) %>% 
-  write.csv(file = '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_original_20220122/MWI_MIHPSA/MIHPSA_results_report.csv')
+```{r}
+write_csv(flows.table, "Analysis/MIHPSA_MWI_output_flows_EMOD_2024907.csv")
+
+write_csv(stocks.table, "Analysis/MIHPSA_MWI_output_stocks_EMOD_2024907.csv")
 ```
 
 
 # Plots for comparison with data
 
-## Read Prevalence 
+## Read Calibration Target Data 
 ```{r Read Prevalence data}
 # Read in the calibration targets data
 prev.target <- read_csv("calib_targets_data/MalawiNationalPrevalence.csv")
@@ -802,6 +806,9 @@ art.cov.target <- art.cov.target %>%
 ```
 
 ## Prevalence plots
+
+### Prevalence
+
 Plot all ages prevalence over time
 ```{r All ages prevalence plot}
 prev.data <- sim.results %>% 
@@ -809,6 +816,7 @@ prev.data <- sim.results %>%
   filter(Age >= 15, Age < 49) %>% 
   group_by(Year, Gender, sim.id) %>% 
   summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  ungroup() %>% 
   mutate(Prevalence = Infected/Population) %>% 
   mutate(Gender = case_when(Gender == 0 ~ "Male", Gender == 1 ~ "Female")) 
 
@@ -840,22 +848,40 @@ prev.plot <- ggplot() +
   
 prev.plot
 ```
+### Age Prevalence
 
 Plot age prevalence curves
 ```{r Plot age prevalence curves}
-prev.data.age <- sim.results %>% 
-  filter(Age >=15, Age <65, Year < 2050) %>% 
-  group_by(Year, Age, Gender, sim.id) %>% 
-  summarize(population = sum(Population), infected = sum(Infected), .groups = 'keep') %>% 
-  mutate(prevalence = infected / population) %>% 
-  mutate(Gender = case_when(Gender == 0 ~ "Male", Gender == 1 ~ "Female"))
+subset_years = c(2015.5, 2010.0, 2004.0, 2015.0)
+age_bins = c(15, 20, 25, 30, 35, 40, 45, 50, 55, 60,65)
+age_labels = c("[15:20)", "[20:25)", "[25:30)", "[30:35)", "[35:40)", "[40:45)", "[45:50)", "[50:55)", "[55:60)", "[60:65)")
 
-# Need to apply the right labels to the age groups...
-prev.data.age$AgeBin <- factor(prev.data.age$Age, 
-                     levels = c(15, 20, 25, 30, 35, 40, 45, 50, 55, 60),
-                     labels = c("[15:20)", "[20:25)", "[25:30)", "[30:35)", "[35:40)", "[40:45)", "[45:50)", "[50:55)", "[55:60)", "[60:65)")
-                     )
-prev.data.age$AgeBin.index = prev.data.age$Age/5-2
+prev.data <- sim.results %>% 
+  filter(Age >=15, Age <= 65, Year %in% subset_years) %>% 
+  group_by(Year, Age, Gender, sim.ix) %>% 
+  summarize(population = sum(Population), infected = sum(Infected), .groups = 'keep') %>% 
+  ungroup()
+
+prev.data <- prev.data %>%  
+  mutate(
+    AgeBin = cut(Age, breaks = age_bins, right = FALSE)
+    ) %>%
+  filter(!is.na(AgeBin))
+prev.data$AgeBin_index = factor(prev.data$AgeBin,
+                                    labels = 1:length(age_labels))
+
+prev.data.age <- prev.data %>% 
+  group_by(Year, Gender, AgeBin, AgeBin_index) %>% 
+  summarize(Population = sum(population),
+            Infected = sum(infected), .groups = "keep") %>% 
+  ungroup() %>% 
+  mutate(Prevalence = Infected/Population) %>% 
+  group_by(Year, Gender, AgeBin, AgeBin_index) %>% 
+  summarize(Population = mean(Population),
+            Infected = mean(Infected),
+            Prevalence = mean(Prevalence), .groups = "keep") %>%
+  ungroup() %>%
+  mutate(Gender = case_when(Gender == 0 ~ "Male", Gender == 1 ~ "Female"))
 
 ap.plot <- ggplot() + 
   geom_point(data = prev.target %>% filter(Age != 11) %>% ungroup(),
@@ -863,12 +889,8 @@ ap.plot <- ggplot() +
   geom_errorbar(data = prev.target %>% filter(Age != 11) %>% ungroup(),
                 mapping = aes(x=Age, ymin=lower, ymax=upper), color="black", width=.3, size=1) +
   geom_point(
-   data = prev.data.age %>% 
-    ungroup() %>% 
-    group_by(Age, AgeBin, AgeBin.index, Gender, Year) %>% 
-    filter(Year %in% c(2015.5, 2010.0, 2004.0, 2015.0)) %>% 
-    summarize(mean.prev = mean(prevalence), med.prev = median(prevalence),.groups = 'keep'),
-    mapping = aes(x = AgeBin.index, y = mean.prev), color = 'blue') +
+   data = prev.data.age,
+    mapping = aes(x = AgeBin_index, y = Prevalence, color = Gender)) +
   facet_grid(cols = vars(Gender), rows = vars(Year)) + 
   scale_x_discrete(breaks = 1:10, 
                    labels = c("[15:20)", "[20:25)", "[25:30)", "[30:35)", "[35:40)", 
@@ -1082,39 +1104,16 @@ oac.plot
 
 ## VMMC 
 
+### Number VMMCs performed
 ```{r}
-circumcision.summary %>% 
+vmmc.summary %>% 
   ggplot() + 
-  geom_line(mapping = aes(x = Year, y = mean.fraction.circumcised))
+  geom_line(mapping = aes(x = Year, y = N_NewVMMC)) + 
+  theme_bw()
 ```
 
+### Fraction circumcised
 
-```{r}
-vmmc.count = sim.results %>% 
-  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.ix, pop.scaling.factor) %>%
-  filter(Gender == 0, Age >= 15, Age < 50, ceiling(Year) != Year, IsCircumcised == 1) %>% 
-  group_by(Year, sim.ix) %>% 
-  summarize(Population = sum(Population* pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(Population = mean(Population))
-
-vmmc.count %>% 
-  ggplot() + 
-  geom_line(mapping = aes(x = Year, y = Population))
-
-vmmc.count = sim.results %>% 
-  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.ix, pop.scaling.factor) %>%
-  filter(Gender == 0, Age < 50, ceiling(Year) != Year, IsCircumcised == 1, Year < 2010) %>% 
-  group_by(Year, sim.ix) %>% 
-  summarize(Population = sum(Population* pop.scaling.factor), .groups = 'keep') %>% 
-  group_by(Year) %>% 
-  summarize(Population = mean(Population))
-
-vmmc.count %>% 
-  ggplot() + 
-  geom_line(mapping = aes(x = Year, y = Population))  
-
-```
 ## HIV Testing
 
 ```{r}
@@ -1129,6 +1128,29 @@ total.tests.summary %>%
   geom_point(data = test.total.counts, 
              mapping = aes(x = Year, y = tests))
 ```
+### Positive tests
+
+```{r}
+positive.test.total.counts <- data.table(
+  Year = c(2019, 2020, 2021, 2022, 2023),
+  tests = c(115618,	83849,	77606,	78432,	67129)
+)
+
+positive.tests.summary <- sim.results %>% 
+  filter(Age >= 15) %>% 
+  EMODAnalyzeR::calculate.tests.performed(gender.breakdown = FALSE) %>% 
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>% 
+  group_by(Year) %>% 
+  summarize(mean.Newly.Tested.Positive = mean(Newly.Tested.Positive*pop.scaling.factor), .groups = 'keep')
+
+ggplot() + 
+  geom_line(data = positive.tests.summary, 
+            mapping = aes(x = Year, y = mean.Newly.Tested.Positive)) + 
+  geom_point(data = positive.test.total.counts, 
+             mapping = aes(x = Year, y = tests))
+```
+
+
 ### ANC Tests
 ```{r}
 
@@ -1138,7 +1160,8 @@ anc.total.counts <- data.table(
 )
 
 anc.summary = sim.results %>% 
-  mutate(ANC = HIV_Positive_at_ANC + HIV_Negative_at_ANC_NULL) %>% 
+  mutate(ANC = HIV_Positive_at_ANC + HIV_Negative_at_ANC_NULL,
+         Year = floor(Year)) %>% 
   filter(Gender == 1, Year > 1999) %>% 
   group_by(Year, sim.ix) %>% 
   summarize(ANC = sum(ANC * pop.scaling.factor)) %>% 
@@ -1152,4 +1175,487 @@ ggplot() +
              mapping = aes(x = Year, y = tests))
 
 ```
+
+# Code Graveyard
+
+
+## Count number of new HIV infections
+This is going to be on a per-year basis, so I will need to use a similar trick here to sum over each pair of observation points for each year. 
+This is still an absolute count, so will need to scale up the number newly infected
+```{r New Infections}
+# Males 15-49
+p1 <- sim.results %>% 
+  filter(Gender == 0, Age >=15, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
+  # rescale by population scale factor
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.new.infections.males = mean(Newly.Infected), .groups = 'keep')
+
+# Females 15-24
+p2 <- sim.results %>% 
+  filter(Gender == 1, Age >=15, Age < 25) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
+  # rescale by population scale factor
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.new.infections.females.younger = mean(Newly.Infected), .groups = 'keep')
+
+# Females 25-49
+p3 <- sim.results %>% 
+  filter(Gender == 1, Age >=25, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
+  # rescale by population scale factor
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.new.infections.females.older = mean(Newly.Infected), .groups = 'keep')
+
+# Overall
+p4 <- sim.results %>% 
+  filter(Age >=15, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, Newly.Infected) %>% 
+  # rescale by population scale factor
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>%
+  group_by(Year, sim.id) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.new.infections.overall = mean(Newly.Infected), .groups = 'keep')
+
+new.inf.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  mutate(Year = floor(Year)) 
+
+new.inf.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## HIV-caused deaths
+Count the number of deaths from HIV
+```{r HIV-caused deaths}
+# Males 15+ 
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  # Rescale by population scaling factor
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.hivdeaths.males = mean(Died_from_HIV), .groups = 'keep')
+
+# Females 15+
+p2 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  # Rescale by population scaling factor
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.hivdeaths.females = mean(Died_from_HIV), .groups = 'keep')
+
+# Children <15
+p3 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>%
+  group_by(Year, sim.id) %>% 
+  # Rescale by population scaling factor
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>%
+  group_by(Year) %>% 
+  summarize(mean.hivdeaths.children = mean(Died_from_HIV), .groups = 'keep')
+
+# Overall
+p4 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died_from_HIV, sim.id, pop.scaling.factor) %>%
+  filter(ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  # Rescale by population scaling factor
+  summarize(Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor), .groups = 'keep') %>%
+  group_by(Year) %>% 
+  summarize(mean.hivdeaths.overall = mean(Died_from_HIV), .groups = 'keep')
+
+hiv.deaths.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  mutate(Year = floor(Year))
+
+hiv.deaths.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## All deaths
+```{r All-cause deaths}
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 0, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.deaths.males = mean(Died), .groups = 'keep')
+
+# Females 15+
+p2 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 1, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.deaths.females = mean(Died), .groups = 'keep')
+
+# Overall
+p3 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Died, sim.id, pop.scaling.factor) %>%
+  filter(ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  summarize(Died = sum(Died*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(mean.deaths.overall = mean(Died), .groups = 'keep')
+
+deaths.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  mutate(Year = floor(Year)) 
+
+deaths.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## HIV Prevalence
+This is calculated at each time step as number infected divided by the population
+
+The MIHPSA 
+```{r Prevalence }
+# Males 15-24 
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(Gender == 0, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>% 
+  group_by(Year) %>% 
+  summarize(mean.prev.males.younger = mean(Prevalence), .groups = 'keep')
+  
+# Males 25-49
+p2 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(Gender == 0, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>% 
+  group_by(Year) %>% 
+  summarize(mean.prev.males.older = mean(Prevalence), .groups = 'keep')
+
+# Females 15-24
+p3 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(Gender == 1, Age >= 15, Age <25, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>% 
+  group_by(Year) %>% 
+  summarize(mean.prev.females.younger = mean(Prevalence), .groups = 'keep')
+  
+# Females 25-49
+p4 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(Gender == 1, Age >= 25, Age <50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>% 
+  group_by(Year) %>% 
+  summarize(mean.prev.females.older = mean(Prevalence), .groups = 'keep')
+
+# Children <15
+p5 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>%
+  group_by(Year, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>%
+  group_by(Year) %>% 
+  summarize(mean.prev.children = mean(Prevalence), .groups = 'keep')
+
+# Female Sex Workers
+p6 <- sim.results %>% 
+  filter(Gender == 1, IP_Key.Risk == 'HIGH') %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(ceiling(Year) != Year) %>%
+  group_by(Year, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>%
+  group_by(Year) %>% 
+  summarize(mean.prev.fsw = mean(Prevalence), .groups = 'keep')
+
+
+# Overall
+p7 <-sim.results %>% 
+  dplyr::select(Year, Gender, Age, Population, Infected, sim.id) %>%
+  filter(ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  summarize(Infected = sum(Infected), Population = sum(Population), .groups = 'keep') %>% 
+  mutate(Prevalence = Infected/Population) %>%
+  group_by(Year) %>% 
+  summarize(mean.prev.overall = mean(Prevalence), .groups = 'keep')
+
+
+prev.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  merge(p5, by = 'Year') %>%
+  merge(p6, by = 'Year') %>%
+  merge(p7, by = 'Year') %>%
+  mutate(Year = floor(Year)) 
+
+prev.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## HIV Incidence
+The MIHPSA report asks us to calculate the per-100-p-y incidence, but I am not clear on how to get this number out. Is the per-year calculation a per 1 person year? So maybe it's dividing this number by 100?
+
+```{r Incidence}
+# Males 15-24
+p1 <- sim.results %>% 
+  filter(Gender == 0, Age >=15, Age < 25) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  group_by(Year) %>% 
+  summarize(mean.inc.males.younger = mean(incidence), .groups = 'keep')
+
+# Males 25-49
+p2 <- sim.results %>% 
+  filter(Gender == 0, Age >=25, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  group_by(Year) %>% 
+  summarize(mean.inc.males.older = mean(incidence), .groups = 'keep')
+
+# Females 15-24
+p3 <- sim.results %>% 
+  filter(Gender == 1, Age >=15, Age < 25) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  group_by(Year) %>% 
+  summarize(mean.inc.females.younger = mean(incidence), .groups = 'keep')
+
+# Females 25-49
+p4 <- sim.results %>% 
+  filter(Gender == 1, Age >=25, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  group_by(Year) %>% 
+  summarize(mean.inc.females.older = mean(incidence), .groups = 'keep')
+
+# Overall
+p5 <- sim.results %>% 
+  filter(Age >=15, Age < 50) %>% 
+  EMODAnalyzeR::calculate.incidence() %>% 
+  # Still disaggregated by gender, so let's aggregate up
+  group_by(Year, sim.id, scenario_name) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected), pop = sum(`Population - Infected`)) %>% 
+  mutate(incidence = Newly.Infected/(pop - Newly.Infected/2)) %>% 
+  dplyr::select(Year, sim.id, incidence) %>% 
+  group_by(Year) %>% 
+  summarize(mean.inc.overall = mean(incidence), .groups = 'keep')
+
+inc.summary <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>%
+  merge(p5, by = 'Year') %>% 
+  mutate(Year = floor(Year)) 
+
+inc.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## PLHIV aware of their status
+This is people who have been diagnosed - will need to double-check that the "Diagnosed" column from the simulation results reflects a running total of the people who know their HIV status:
+```{r Diagnosed}
+plhiv.diagnosed.summary <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Diagnosed, Infected, sim.id, pop.scaling.factor) %>%
+  filter(ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  mutate(PLHIV.Diagnosed = case_when(Infected == 0 ~ 0,
+                                     Infected > 0 ~ Diagnosed/Infected) ) %>%
+  group_by(Year) %>% 
+  summarize(mean.plhiv.diagnosed = mean(PLHIV.Diagnosed), .groups = 'keep') %>% 
+  mutate(Year = floor(Year)) 
+
+plhiv.diagnosed.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## Total tests and fraction of positive tests
+Total tests performed = Newly.Tested.Positive + Newly.Tested.Negative
+Just as for incidence, I am going to have to combine everything by year. I'll create a function for doing this similar to the one that David made for incidence calculation.
+
+```{r Total Tests Performed Over Age 15}
+total.tests.summary <- sim.results %>% 
+  filter(Age >= 15) %>% 
+  EMODAnalyzeR::calculate.tests.performed(gender.breakdown = TRUE) %>% 
+  inner_join(sim.results.pop.scaling, by = c("sim.id")) %>% 
+  group_by(Year, Gender) %>% 
+  summarize(mean.Total.Tests = mean(Total.Tests*pop.scaling.factor), .groups = 'keep') %>% 
+  mutate(Gender_labels = case_when(Gender == 0 ~ "mean.Total.Tests.males", 
+                                   Gender == 1 ~ "mean.Total.Tests.females")) %>% 
+  pivot_wider(id_cols = Year, 
+              names_from = Gender_labels,
+              values_from = mean.Total.Tests) %>% 
+  mutate(mean.Total.Tests = mean.Total.Tests.males + mean.Total.Tests.females)
+
+total.tests.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value) %>% head
+```
+
+### Positive tests
+```{r Fraction of positive tests for adults}
+
+positive.tests.summary <- sim.results %>% 
+  filter(Age > 15) %>% 
+  EMODAnalyzeR::calculate.tests.performed(gender.breakdown = FALSE) %>% 
+  group_by(Year) %>% 
+  summarize(mean.Proportion.Positive.Tests = mean(Proportion.Positive.Tests))
+
+positive.tests.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+
+
+## PLHIV on ART
+Count the number of people on art. Art coverage is the ratio between people on art and PLHIV.
+
+```{r OnART}
+# Males Age 15+
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 0, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
+                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year) %>% 
+  summarize(mean.On_ART.males = mean(On_ART), mean.ART.coverage.males = mean(ART.coverage), .groups = 'keep')
+
+# Females Age 15+
+p2 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Gender == 1, Age >= 15, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
+                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year) %>% 
+  summarize(mean.On_ART.females = mean(On_ART), mean.ART.coverage.females = mean(ART.coverage), .groups = 'keep')
+
+# Children
+p3 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Age < 15, ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
+            .groups = 'keep') %>%   
+  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
+                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year) %>% 
+  summarize(mean.On_ART.children = mean(On_ART), mean.ART.coverage.children = mean(ART.coverage), .groups = 'keep')
+
+# Total
+p4 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, On_ART, Infected, sim.id, pop.scaling.factor) %>%
+  filter(ceiling(Year) != Year) %>% 
+  group_by(Year, sim.id) %>% 
+  summarize(On_ART = sum(On_ART*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  mutate(ART.coverage = case_when(Infected == 0 ~ 0,
+                                  Infected > 0 ~ On_ART/Infected)) %>% 
+  group_by(Year) %>% 
+  summarize(mean.On_ART.overall = mean(On_ART), mean.ART.coverage.overall = mean(ART.coverage), .groups = 'keep')
+
+
+onart.data <- merge(p1, p2, by = 'Year') %>% 
+  merge(p3, by = 'Year') %>% 
+  merge(p4, by = 'Year') %>% 
+  mutate(Year = floor(Year)) 
+
+onart.summary <- onart.data %>% select(Year, mean.On_ART.males, mean.On_ART.females, mean.On_ART.children, mean.On_ART.overall)
+
+onart.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+```{r Art Coverage}
+art.coverage.summary <- onart.data %>% 
+  select(Year, mean.ART.coverage.males, mean.ART.coverage.females, 
+         mean.ART.coverage.children, mean.ART.coverage.overall)
+
+art.coverage.summary %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+
+## VMMC
+
+Fraction of males aged 15-49 who have been circumcised
+
+Given that the data only seem to count people after 2015, which is when the VMMC program started in Malawi, 
+```{r Circumcision fraction}
+circumcision.summary <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, IsCircumcised, Population, sim.id) %>%
+  filter(Gender == 0, Age >= 15, Age < 50, ceiling(Year) != Year) %>% 
+  group_by(Year, Gender, sim.id, IsCircumcised) %>% 
+  summarize(Population = sum(Population), .groups = 'keep') %>% 
+  mutate(IsCircumcised.status = case_when(IsCircumcised == 0 ~ 'No', IsCircumcised == 1 ~ 'Yes')) %>% 
+  pivot_wider(id_cols = c(Year, sim.id), names_from = IsCircumcised.status, values_from = Population) %>% 
+  mutate(fraction.circumcised = Yes/(No + Yes)) %>% 
+  group_by(Year) %>% 
+  summarize(mean.fraction.circumcised = mean(fraction.circumcised), .groups = 'keep') %>% 
+  mutate(Year = floor(Year)) 
+
+circumcision.summary  %>% 
+  pivot_longer(-Year) %>% 
+  pivot_wider(names_from = Year, values_from = value)
+```
+
+## Save everything as a csv:
+```{r Output as csv}
+rbind(pop.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # population
+      plhiv.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # plhiv
+      new.inf.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # new hiv infections
+      hiv.deaths.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # hiv deaths
+      deaths.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # total deaths
+      prev.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # prevalence
+      inc.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # incidence
+      plhiv.diagnosed.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # plhiv aware of their status
+      total.tests.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # total tests performed
+      positive.tests.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # positive tests performed
+      onart.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # number of plhiv on art
+      art.coverage.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value), # art coverage summary
+      circumcision.summary %>% pivot_longer(-Year) %>% pivot_wider(names_from = Year, values_from = value) # circumcisions
+) %>% 
+  write.csv(file = '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_original_20220122/MWI_MIHPSA/MIHPSA_results_report.csv')
+```
+
 

@@ -84,6 +84,7 @@
          "DelayUntilBooster4",
          "End_of_TMC",
          "GoOffDrug",
+         "HCTTestingLoopRapidTest",
          "HCTTestingLoop0",
          "HCTTestingLoop1",
          "HCTTestingLoop2",

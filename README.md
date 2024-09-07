@@ -12,6 +12,7 @@ These are the configuration files for the Malawi MIHPSA collaboration.
         * Updated VMMC
         * Removed PrEP
         * Updated Accessibility using RTEC-HIV
+        * Minimal scenario for MIHPSA-MWI completed
 * 2023-11-03 - Repeating the attributions of deaths and transmissions simulations for Malawi
     * using 250 simulation runs 
     * Important to remember that there's a different optim_script for each of the transmissions and deaths 

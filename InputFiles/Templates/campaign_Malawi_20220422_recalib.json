@@ -1951,7 +1951,7 @@
 			"Demographic_Coverage": 1,
 			"Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
-				"Trigger_Condition_List": [ "HIVSymptomatic" ],
+				"Trigger_Condition_List": [ "NewlySymptomatic" ],
 				"Actual_IndividualIntervention_Config__KP_Sympt_Link": "<-- MARKER",
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
