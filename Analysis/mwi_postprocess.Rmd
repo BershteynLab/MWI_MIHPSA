@@ -5,7 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_original_20220122')
+knitr::opts_knit$set(root.dir = '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis')
 ```
 
 # Postprocessing MWI model outputs
@@ -662,14 +662,14 @@ onart.summary %>%
 Assume 1/8 of people under CD4 = 200 are < 50 - we made this same assumption with MIHPSA ZWE
 ```{r}
 cd4.summary <- sim.results %>% 
-  dplyr::select(Year, Gender, Age, 
+  dplyr::select(Year, Age, 
                 Infected.CD4.500.Plus..Not.On.ART., 
                 Infected.CD4.350.To.499..Not.On.ART.,
                 Infected.CD4.200.To.349..Not.On.ART.,
                 Infected.CD4.Under.200..Not.On.ART.,
                 sim.ix, pop.scaling.factor) %>%
   filter(Age >= 15, ceiling(Year) != Year) %>% 
-  group_by(Year, Gender, sim.ix) %>% 
+  group_by(Year, sim.ix) %>% 
   summarize(Infected.CD4.500.Plus..Not.On.ART. = sum(Infected.CD4.500.Plus..Not.On.ART.*pop.scaling.factor), 
             Infected.CD4.350.To.499..Not.On.ART. = sum(Infected.CD4.350.To.499..Not.On.ART.*pop.scaling.factor), 
             Infected.CD4.200.To.349..Not.On.ART. = sum(Infected.CD4.200.To.349..Not.On.ART.*pop.scaling.factor), 
@@ -679,7 +679,7 @@ cd4.summary <- sim.results %>%
   summarize(N_PLHIV_15_UP_CD4_500_INF = mean(Infected.CD4.500.Plus..Not.On.ART.), 
             N_PLHIV_15_UP_CD4_350_500 = mean(Infected.CD4.350.To.499..Not.On.ART.),
             N_PLHIV_15_UP_CD4_200_350 = mean(Infected.CD4.200.To.349..Not.On.ART.),
-            N_PLHIV_15_UP_CD4_000_050 = 7/8*mean(Infected.CD4.Under.200..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_050_200 = 7/8*mean(Infected.CD4.Under.200..Not.On.ART.),
             N_PLHIV_15_UP_CD4_000_050 = 1/8*mean(Infected.CD4.Under.200..Not.On.ART.),
             .groups = 'keep') %>% 
   ungroup() %>%
@@ -689,6 +689,61 @@ cd4.summary %>%
   pivot_longer(-Year) %>% 
   pivot_wider(names_from = Year, values_from = value)
 ```
+
+## Brief Check - total number diagnosed
+
+```{r}
+plhiv.summary %>% 
+  merge(onart.summary, by = c("Year")) %>%
+  mutate(N_PLHIV_M = N_PLHIV_15_24_M + N_PLHIV_25_49_M + N_PLHIV_50_UP_M,
+         N_PLHIV_F = N_PLHIV_15_24_F + N_PLHIV_25_49_F + N_PLHIV_50_UP_F) %>% 
+  mutate(NoART_M = N_PLHIV_M - N_ART_15_UP_M,
+         NoART_F = N_PLHIV_F - N_ART_15_UP_F) %>% 
+  mutate(NoART = NoART_F + NoART_M)
+```
+```{r}
+cd4.summary %>% mutate(Tot = 
+                         N_PLHIV_15_UP_CD4_500_INF + N_PLHIV_15_UP_CD4_350_500 + 
+                         N_PLHIV_15_UP_CD4_200_350 + N_PLHIV_15_UP_CD4_050_200 +
+                         N_PLHIV_15_UP_CD4_000_050)
+```
+```{r}
+noart.summary <- sim.results %>% 
+  filter(Year != ceiling(Year), Age > 15) %>% 
+  dplyr::select(Year,
+                Infected,
+                On_ART,
+                Infected.CD4.500.Plus..Not.On.ART., 
+                Infected.CD4.350.To.499..Not.On.ART.,
+                Infected.CD4.200.To.349..Not.On.ART.,
+                Infected.CD4.Under.200..Not.On.ART.,
+                sim.ix, pop.scaling.factor) %>% 
+  group_by(Year, sim.ix) %>% 
+  summarize(Infected = sum(Infected * pop.scaling.factor),
+            On_ART = sum(On_ART* pop.scaling.factor),
+            Infected.CD4.500.Plus..Not.On.ART. = sum(Infected.CD4.500.Plus..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.350.To.499..Not.On.ART. = sum(Infected.CD4.350.To.499..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.200.To.349..Not.On.ART. = sum(Infected.CD4.200.To.349..Not.On.ART.*pop.scaling.factor), 
+            Infected.CD4.Under.200..Not.On.ART. = sum(Infected.CD4.Under.200..Not.On.ART.*pop.scaling.factor), 
+            .groups = 'keep') %>% 
+  group_by(Year) %>% 
+  summarize(
+    Infected = mean(Infected),
+    On_ART = mean(On_ART),
+    N_PLHIV_15_UP_CD4_500_INF = mean(Infected.CD4.500.Plus..Not.On.ART.), 
+            N_PLHIV_15_UP_CD4_350_500 = mean(Infected.CD4.350.To.499..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_200_350 = mean(Infected.CD4.200.To.349..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_050_200 = 7/8*mean(Infected.CD4.Under.200..Not.On.ART.),
+            N_PLHIV_15_UP_CD4_000_050 = 1/8*mean(Infected.CD4.Under.200..Not.On.ART.),
+  ) %>% 
+  ungroup() %>% 
+  mutate(method1 = Infected - On_ART,
+         method2 = N_PLHIV_15_UP_CD4_500_INF + N_PLHIV_15_UP_CD4_350_500 + 
+           N_PLHIV_15_UP_CD4_200_350 + N_PLHIV_15_UP_CD4_050_200 + N_PLHIV_15_UP_CD4_000_050)
+
+noart.summary %>% View
+```
+
 
 # Output
 
@@ -743,6 +798,17 @@ stocks.table
 ```
 
 ```{r}
+getwd(
+)
+
+stocks.table <- read.csv("Analysis/MIHPSA_MWI_output_stocks_EMOD_2024907.csv")
+
+pivot_longer(stocks.table,
+             cols = 2021:2050)
+```
+
+
+```{r}
 write_csv(flows.table, "Analysis/MIHPSA_MWI_output_flows_EMOD_2024907.csv")
 
 write_csv(stocks.table, "Analysis/MIHPSA_MWI_output_stocks_EMOD_2024907.csv")
@@ -754,7 +820,7 @@ write_csv(stocks.table, "Analysis/MIHPSA_MWI_output_stocks_EMOD_2024907.csv")
 ## Read Calibration Target Data 
 ```{r Read Prevalence data}
 # Read in the calibration targets data
-prev.target <- read_csv("calib_targets_data/MalawiNationalPrevalence.csv")
+prev.target <- read_csv("../calib_targets_data/MalawiNationalPrevalence.csv")
 
 # Convenient relabels of age bins
 prev.target$Age = factor(prev.target$AgeBin, 
@@ -769,16 +835,14 @@ prev.target$Year.label = factor(prev.target$Year,
 
 ```{r Read Incidence data}
 # Using the new Incidence data, which has the right age bins for fair comparison to the reports
-inc.target <- read_csv("calib_targets_data/Malawi_Incidence_new.csv")
+inc.target <- read_csv("../calib_targets_data/Malawi_Incidence_new.csv")
 
-inc.target$Year = factor(inc.target$Year, levels = c("2015.5"), labels = c("2015 (PHIA)"))
+inc.target$Year_label = factor(inc.target$Year, levels = c("2015.5", "2020"), labels = c("2015 (PHIA)","2020 (PHIA)"))
 
 inc.target$Age = factor(inc.target$AgeBin, 
                         levels = c("[15:50)", "[15:25)", "[25:35)", "[35:50)"),
                         labels = c(1,2,3,4))
 
-
-# This is the missing row from the incidence data
 ```
 
 ```{r Read ART coverage data}
@@ -924,10 +988,10 @@ inc.plot <- ggplot() +
             mapping = aes(x = Year, y = mean.inc.overall), size = 1, color = "blue") +
   # plot the calibration targets
   geom_point(data = inc.target %>% filter(Age == 1), 
-             aes(x=2015, y=Incidence),
+             aes(x=Year, y=Incidence),
              size=2, color = "black") + 
   geom_errorbar(data = inc.target %>% filter(Age == 1), 
-                aes(x=2015, ymin=lb, ymax=ub), 
+                aes(x=Year, ymin=lb, ymax=ub), 
                 color="black", width=2, size=1) +
   facet_grid(cols = vars(Gender)) +
   xlab("Year") +
