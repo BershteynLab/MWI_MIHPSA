@@ -30,6 +30,8 @@ devtools::install_github("BershteynLab/EMODAnalyzeR")
 #experiment_path = "/gpfs/scratch/citrod01/experiments/Baseline-campaign_Malawi_1Dec2021_recalib-Baseline___2022_04_12_18_14_09_084274",
 input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-MWI_Base___2024_09_01_16_12_22_555024"
 
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-MWI_Base___2024_09_16_10_42_24_238125"
+
 sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
   scenario_name = 'minimal',
@@ -51,6 +53,33 @@ sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
   ungroup()
 
 ```
+
+```{r}
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/Baseline-campaign_Malawi_20220422_recalib-MWI_Base___2024_09_01_16_12_22_555024/"
+
+sim.results.old <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'new',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Tested.Past.Year.or.On_ART", "Tested.Ever","Diagnosed",
+                        "Infected.CD4.Under.200..Not.On.ART.", "Infected.CD4.200.To.349..Not.On.ART.",
+                        "Infected.CD4.350.To.499..Not.On.ART.", "Infected.CD4.500.Plus..Not.On.ART.",
+                        "ARTStaging9","HCTTestingLoop0",
+                         "Program_VMMC","Traditional_MC"
+                        ), # need to add "GaveBirth"
+                          # "HCTTestingLoop1","Needs_PMTCT_Diagnostic_Test","HIV_Positive_at_ANC",
+                          # "HIV_Negative_at_ANC_NULL","ARTStaging0","ARTStaging1","ARTStaging_Negative_NULL",
+  stratify_columns = c("Year", "Gender", "Age"), # Need to add "On_Art_Dim", "HasHIV"; unsure if I need "IP_Key.Risk",  "IsCircumcised"
+  min_age_inclusive = 0,
+  max_age_inclusive = 99,
+  verbose = TRUE
+) %>% 
+  ungroup()
+
+
+```
+
 
 
 # Population rescaling
@@ -380,21 +409,33 @@ testing.summary %>%
 
 ```{r}
 vmmc.summary <- sim.results %>% 
-  mutate(Year = ceiling(Year)) %>% 
-  dplyr::select(Year, Gender, Age, Program_VMMC, sim.ix, pop.scaling.factor) %>%
+  mutate(Year = floor(Year)) %>% 
+  dplyr::select(scenario_name, Year, Gender, Age, Program_VMMC, sim.ix, pop.scaling.factor) %>%
   filter(Gender == 0) %>% 
-  group_by(Year, sim.ix) %>% 
+  group_by(Year, sim.ix, scenario_name) %>% 
   # remember to rescale by population scaling factor!
   summarize(Program_VMMC = sum(Program_VMMC*pop.scaling.factor),
             .groups = 'keep') %>% 
-  group_by(Year) %>% 
+  group_by(scenario_name, Year) %>% 
   summarize(N_NewVMMC = mean(Program_VMMC), 
             .groups = 'keep') %>%
+  ungroup() %>% 
   mutate(Year = floor(Year))
 
-vmmc.summary %>% 
+vmmc.summary %>% select(-scenario_name) %>% 
   pivot_longer(-Year) %>% 
   pivot_wider(names_from = Year, values_from = value)
+```
+
+Check: are there enough men alive at the time to receive vmmc?
+
+```{r}
+sim.results %>% 
+  filter(Gender == 0, Age >=5, Age < 40) %>% 
+  group_by(Year, sim.ix) %>% 
+  summarize(pop  = sum(Population * pop.scaling.factor)) %>%
+  group_by(Year) %>% 
+  summarize(pop = mean(pop)) %>% ungroup()
 ```
 
 
@@ -976,16 +1017,17 @@ inc.table <- sim.results %>%
   group_by(Year, Gender, sim.id, scenario_name) %>% 
   summarize(Newly.Infected = sum(Newly.Infected), pop = sum(`Population - Infected`)) %>% 
   mutate(incidence = Newly.Infected/(pop - Newly.Infected/2)) %>% 
-  dplyr::select(Year, Gender, sim.id, incidence) %>% 
+  dplyr::select(Year, Gender, scenario_name, sim.id, incidence) %>% 
   mutate(Gender = case_when(Gender == 0 ~ "Male", Gender == 1 ~ "Female"))
 
 inc.plot <- ggplot() + 
   # plot the simulation results
-  geom_point(data = inc.table, mapping = aes(x = Year, y = incidence), color = 'gray', alpha = .1) +
+  #geom_point(data = inc.table, mapping = aes(x = Year, y = incidence), color = 'gray', alpha = .1) +
   geom_line(data = inc.table %>% 
-                    group_by(Year, Gender) %>% 
+                    group_by(Year, Gender, scenario_name) %>% 
                     summarize(mean.inc.overall = mean(incidence), .groups = 'keep'), 
-            mapping = aes(x = Year, y = mean.inc.overall), size = 1, color = "blue") +
+            mapping = aes(x = Year, y = mean.inc.overall, color = scenario_name), 
+            size = 1) + #, color = "blue") +
   # plot the calibration targets
   geom_point(data = inc.target %>% filter(Age == 1), 
              aes(x=Year, y=Incidence),
@@ -1008,7 +1050,16 @@ inc.plot <- ggplot() +
 inc.plot
 ```
 
-Incidence by age plots
+```{r}
+data = inc.table %>% 
+        group_by(Year, Gender, scenario_name) %>% 
+        summarize(mean.inc.overall = mean(incidence), .groups = 'keep')
+
+data %>% View
+```
+
+
+### Incidence by age plots
 ```{r Plot incidence by age}
 # Need to bin ages to match the PHIA data
 t1 <- sim.results %>% 
@@ -1172,7 +1223,7 @@ oac.plot
 ```{r}
 vmmc.summary %>% 
   ggplot() + 
-  geom_line(mapping = aes(x = Year, y = N_NewVMMC)) + 
+  geom_line(mapping = aes(x = Year, y = N_NewVMMC, color = scenario_name)) + 
   theme_bw()
 ```
 
