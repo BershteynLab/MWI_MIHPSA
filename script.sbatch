@@ -21,4 +21,4 @@
 
 #python run_scenarios.py -c optim_script_transmission.py --resample-method provided --samples resampled_parameter_sets_20230424.csv --output-dir MWI_transmission --suite-name MWI_transmission --table scenarios_transmission.csv
 
-python run_scenarios.py -c optim_script.py --resample-method provided --samples resampled_parameter_sets_20230424.csv --output-dir MWI_minimal --suite-name MWI_minimal --table scenarios.csv
+python run_scenarios.py -c optim_script.py --resample-method provided --samples resampled_parameter_sets_20230424.csv --output-dir pepfar_mwi --suite-name pepfar_mwi --table scenarios.csv

@@ -393,7 +393,8 @@
       "Report_HIV_ByAgeAndGender_Add_Concordant_Relationships": 0,
       "Report_HIV_ByAgeAndGender_Add_Relationships": 0,
       "Report_HIV_ByAgeAndGender_Add_Transmitters": 0,
-      "Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [
+      "Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [0,15,99],
+      ".Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [
          0,
          1,
          2,
@@ -520,7 +521,7 @@
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 1990,
-      "Report_HIV_ByAgeAndGender_Stop_Year": 2051,
+      "Report_HIV_ByAgeAndGender_Stop_Year": 2040,
       "Report_HIV_ByAgeAndGender_Stratify_Infected_By_CD4": 1,
       "Report_HIV_Event_Channels_List": [],
       "Report_HIV_Infection": 0,
@@ -542,7 +543,7 @@
       "Sexual_Debut_Age_Male_Weibull_Scale": 16.946729660034,
       "Sexual_Debut_Age_Min": 13,      
       "Sexual_Debut_Age_Setting_Type": "WEIBULL",         
-      "Simulation_Duration": 35952.5,
+      "Simulation_Duration": 29200,
       "Simulation_Timestep": 30.4166666666667,
       "Simulation_Type": "HIV_SIM",
       "SMALL_Base_Population_Scale_Factor": 0.0001,
