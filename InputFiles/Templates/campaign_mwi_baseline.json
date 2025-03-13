@@ -1,6 +1,6 @@
 {
-   "Campaign_Name": "Baseline campaign for Malawi, 3 node",
-   "ModifiedVersion": "22Nov2021",
+   "Campaign_Name": "Baseline campaign for Malawi, 3 node -  Baseline reference for emergency forecast of PEPFAR's impact",
+   "ModifiedVersion": "2025-03-13",
    "Use_Defaults": 1,
    "Events": [
 	{
@@ -980,7 +980,55 @@
 						0
 					],
 					"Num_Targeted_Males": [
-						12
+						3457
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2024,
+					"End_Year": 2025,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						3457
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2025,
+					"End_Year": 2040,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						51855
 					],
 					"Property_Restrictions_Within_Node": [],
 					"Target_Disease_State": [
@@ -1315,6 +1363,54 @@
 					],
 					"Num_Targeted_Males": [
 						68322
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2024,
+					"End_Year": 2025,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						68322
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2025,
+					"End_Year": 2040,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						1024830
 					],
 					"Property_Restrictions_Within_Node": [],
 					"Target_Disease_State": [
@@ -1659,6 +1755,54 @@
 						]
 					],
 					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2024,
+					"End_Year": 2025,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						38076
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
+				},
+				{
+					"Age_Ranges_Years": [
+						{ 
+							"Min": 5,
+							"Max": 40
+						}						
+					],
+					"Start_Year": 2025,
+					"End_Year": 2040,
+					"Num_Targeted_Females": [
+						0
+					],
+					"Num_Targeted_Males": [
+						571140
+					],
+					"Property_Restrictions_Within_Node": [],
+					"Target_Disease_State": [
+						[
+							"HIV_Negative",
+							"Not_Have_Intervention"
+						]
+					],
+					"Target_Disease_State_Has_Intervention_Name": "Any_MC"
 				}
 			]
 		}
@@ -1856,7 +2000,9 @@
             "Demographic_Coverage": 1,
             "Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
-				"Trigger_Condition_List": [ "HCTTestingLoop0" ],
+				"Trigger_Condition_List": [ 
+					"HCTTestingLoop0" 
+				],
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVMuxer",
 					"Muxer_Name": "HCTTestingLoop",
@@ -1919,12 +2065,12 @@
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVRandomChoice",
 					"Choice_Names": [
-						"HCTTestingLoopRapidTest",
-						"HCTTestingLoop0"
+						"HCTTestingLoop0",
+						"HCTUptakePostDebut1"
 					],
 					"Choice_Probabilities": [
-						0.05,
-						0.95
+						0.95,
+						0.05
 					],
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [

@@ -10,7 +10,7 @@
 #SBATCH --partition=cpu_medium
 #SBATCH --mem=8GB
 
-#SBATCH --job-name=MWI
+#SBATCH --job-name=MWI_PEPFAR
 #SBATCH --chdir=/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422
 
 #SBATCH --mail-type=END

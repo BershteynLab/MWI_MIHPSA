@@ -266,7 +266,10 @@
          "WillDoTraditionalMC",
          "WillNotReceiveTraditionalMaleCircumcision",
          "WillReceiveMedicalMaleCircumcision",
-         "WillReceiveTraditionalMaleCircumcision"
+         "WillReceiveTraditionalMaleCircumcision",
+         "PEPFAR_ART_Dropout", 
+         "PEPFAR_ART_Continue",
+         "HCTTestingPEPFAR_Delayed"
       ],
       "Custom_Node_Events": [
          "OnART1",
@@ -506,21 +509,19 @@
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,
       "Report_HIV_ByAgeAndGender_Event_Counter_List": [
-         "HCTTestingLoop1",
-         "ARTStaging9",
-         "HCTTestingLoop0",
+         "HIVPositiveHIVTest", 
+         "HIVNegativeHIVTest",
          "Needs_PMTCT_Diagnostic_Test",
-         "HIV_Positive_at_ANC",
-         "HIV_Negative_at_ANC_NULL",
-         "ARTStaging0",
-         "ARTStaging1",
-         "ARTStaging_Negative_NULL", 
-         "GaveBirth",
+         "NewlySymptomatic",
          "Program_VMMC",
-         "Traditional_MC"
+         "ReceivePrEP_HIGH",
+         "HCTTestingLoopRapidTest",
+         "PEPFAR_ART_Dropout",
+         "PEPFAR_ART_Continue",
+         "HCTTestingPEPFAR_Delayed"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
-      "Report_HIV_ByAgeAndGender_Start_Year": 1990,
+      "Report_HIV_ByAgeAndGender_Start_Year": 2000,
       "Report_HIV_ByAgeAndGender_Stop_Year": 2040,
       "Report_HIV_ByAgeAndGender_Stratify_Infected_By_CD4": 1,
       "Report_HIV_Event_Channels_List": [],
