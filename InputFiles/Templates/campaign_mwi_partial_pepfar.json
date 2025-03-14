@@ -2055,15 +2055,15 @@
 					"Delay_Period_Exponential": 365,
 					"Broadcast_Event": "HCTTestingLoop1",
 					"Disqualifying_Properties": [
-						"CascadeState:LostForever",
-						"CascadeState:LostForever_PEPFAR_cancelled",
-						"CascadeState:OnART",
-						"CascadeState:LinkingToART",
-						"CascadeState:OnPreART",
-						"CascadeState:LinkingToPreART",
-						"CascadeState:ARTStaging"
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
+						"InterventionStatus:OnART",
+						"InterventionStatus:LinkingToART",
+						"InterventionStatus:OnPreART",
+						"InterventionStatus:LinkingToPreART",
+						"InterventionStatus:ARTStaging"
 					],
-					"New_Property_Value": "CascadeState:HCTTestingLoop"
+					"New_Property_Value": "InterventionStatus:HCTTestingLoop"
 				}
 			}
 		}
@@ -2088,15 +2088,15 @@
 					"Choice_Names": ["HCTTestingPEPFAR_Delayed","HCTTestingLoopRapidTest"],
 					"Choice_Probabilities": [0.49,0.51],
 					"Disqualifying_Properties": [
-						"CascadeState:LostForever",
-						"CascadeState:LostForever_PEPFAR_cancelled",
-						"CascadeState:OnART",
-						"CascadeState:LinkingToART",
-						"CascadeState:OnPreART",
-						"CascadeState:LinkingToPreART",
-						"CascadeState:ARTStaging"
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
+						"InterventionStatus:OnART",
+						"InterventionStatus:LinkingToART",
+						"InterventionStatus:OnPreART",
+						"InterventionStatus:LinkingToPreART",
+						"InterventionStatus:ARTStaging"
 					],
-					"New_Property_Value": "CascadeState:HCTTestingLoop"
+					"New_Property_Value": "InterventionStatus:HCTTestingLoop"
 				}
 			}
 		}
