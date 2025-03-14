@@ -1833,6 +1833,7 @@
 					"Days_To_Diagnosis": 0,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -1859,6 +1860,7 @@
 				"New_Property_Value": "InterventionStatus:HCTUptakePostDebut",
 				"Disqualifying_Properties": [
 					"InterventionStatus:LostForever",
+					"InterventionStatus:LostForever_PEPFAR_cancelled",
 					"InterventionStatus:OnART",
 					"InterventionStatus:LinkingToART",
 					"InterventionStatus:OnPreART",
@@ -1909,6 +1911,7 @@
 					"Delay_Period_Exponential": 365,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -1948,6 +1951,7 @@
 					"Default_Value": 0,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2013,6 +2017,7 @@
 					"Max_Entries": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2042,6 +2047,7 @@
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2075,6 +2081,7 @@
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2108,6 +2115,7 @@
 					"Female_Multiplier": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2171,6 +2179,7 @@
 					"New_Property_Value": "InterventionStatus:TestingOnANC",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2238,6 +2247,7 @@
 					"New_Property_Value": "InterventionStatus:TestingOnANC",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2266,6 +2276,7 @@
          			"Positive_Diagnosis_Event": "ARTStaging1",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2340,6 +2351,7 @@
 					"Ramp_Rate": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2390,6 +2402,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2462,6 +2475,7 @@
 					"Female_Multiplier": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2494,6 +2508,7 @@
 					"New_Property_Value": "InterventionStatus:ARTStagingDiagnosticTest",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2520,6 +2535,7 @@
                        "class": "HIVRandomChoice",
                        "Disqualifying_Properties": [
                            "InterventionStatus:LostForever",
+						   "InterventionStatus:LostForever_PEPFAR_cancelled",
                            "InterventionStatus:OnART",
                            "InterventionStatus:LinkingToART",
                            "InterventionStatus:OnPreART",
@@ -2559,6 +2575,7 @@
 					"Broadcast_Event": "ARTStaging3",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2586,6 +2603,7 @@
 					"New_Property_Value": "InterventionStatus:ARTStaging",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2639,6 +2657,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2672,6 +2691,7 @@
 					"New_Property_Value": "InterventionStatus:ARTStaging",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2711,6 +2731,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -2747,6 +2768,7 @@
 					"Days_To_Diagnosis": 0,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART"
@@ -2778,6 +2800,7 @@
 					"Broadcast_Event": "OnPreART1",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART"
 					]
@@ -2809,6 +2832,7 @@
 					"New_Property_Value": "InterventionStatus:OnPreART",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART"
 					]
@@ -2860,6 +2884,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART"
 					]
@@ -2885,6 +2910,7 @@
 					"New_Property_Value": "InterventionStatus:OnPreART",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART"
 					]
@@ -2922,6 +2948,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART"
 					]
@@ -2956,6 +2983,7 @@
 					"Ramp_Rate": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART"
 					]
 				}
@@ -2986,7 +3014,9 @@
 					"Delay_Period_Max": 120,
 					"Delay_Period_Min": 1,
 					"Disqualifying_Properties": [
-						"InterventionStatus:LostForever"
+						"InterventionStatus:LostForever",
+
+						"InterventionStatus:LostForever_PEPFAR_cancelled"
 					]
 				}
 			}
@@ -3051,7 +3081,8 @@
                       "Delay_Period_Exponential": 2051,
                       "Max_Entries": 1,
                       "Disqualifying_Properties": [
-                          "InterventionStatus:LostForever"
+                          "InterventionStatus:LostForever",
+						  "InterventionStatus:LostForever_PEPFAR_cancelled"
                       ]
                   }
               }
@@ -3112,7 +3143,8 @@
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVRandomChoice",
 					"Disqualifying_Properties": [
-						"InterventionStatus:LostForever"
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled"
 					],
 					"Choice_Names": [
 						"HCTUptakePostDebut8",
@@ -3172,7 +3204,8 @@
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
-						"InterventionStatus:LostForever"
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled"
 					],
 					"Days_To_Diagnosis": 0,
 					"Female_Multiplier": 1,
@@ -3216,7 +3249,8 @@
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
-						"InterventionStatus:LostForever"
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled"
 					],
 					"Days_To_Diagnosis": 0,
 					"Female_Multiplier": 1,
@@ -3255,6 +3289,7 @@
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -3324,6 +3359,7 @@
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",
@@ -3385,6 +3421,7 @@
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART"
 					],
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
@@ -3438,6 +3475,7 @@
 					"class": "HIVPiecewiseByYearAndSexDiagnostic",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART"
 					],
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
@@ -3487,6 +3525,7 @@
 					},
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
 						"InterventionStatus:OnART",
 						"InterventionStatus:LinkingToART",
 						"InterventionStatus:OnPreART",

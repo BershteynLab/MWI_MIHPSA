@@ -2138,6 +2138,41 @@
 		"Start_Year": 1990,
 		"Event_Coordinator_Config": {
 			"class": "StandardInterventionDistributionEventCoordinator",
+            "Intervention_Config": {
+				"class": "NodeLevelHealthTriggeredIV",
+				"Duration":12775,
+				"Trigger_Condition_List": [ "HCTTestingLoop2" ],
+				"Actual_IndividualIntervention_Config": {
+					"class": "HIVRandomChoice",
+					"Choice_Names": [
+						"HCTTestingLoop0",
+						"HCTUptakePostDebut1"
+					],
+					"Choice_Probabilities": [
+						0.95,
+						0.05
+					],
+					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
+					"Disqualifying_Properties": [
+						"InterventionStatus:LostForever",
+						"InterventionStatus:LostForever_PEPFAR_cancelled",
+						"InterventionStatus:OnART",
+						"InterventionStatus:LinkingToART",
+						"InterventionStatus:OnPreART",
+						"InterventionStatus:LinkingToPreART",
+						"InterventionStatus:ARTStaging"
+					]
+				}
+			}
+		}
+	},
+	{
+		"Event_Name": "HCTTestingLoop: state 2 (HCT Testing Dropout)",
+		"class": "CampaignEventByYear",
+		"Nodeset_Config": { "class": "NodeSetAll" },
+		"Start_Year": 2025,
+		"Event_Coordinator_Config": {
+			"class": "StandardInterventionDistributionEventCoordinator",
 			"Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
 				"Trigger_Condition_List": [ "HCTTestingLoop2" ],
@@ -2148,8 +2183,8 @@
 						"HCTUptakePostDebut1"
 					],
 					"Choice_Probabilities": [
-						0.8,
-						0.2
+						0.80,
+						0.20
 					],
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [
