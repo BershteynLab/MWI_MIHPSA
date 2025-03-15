@@ -2006,14 +2006,13 @@
 				"class": "NodeLevelHealthTriggeredIV",
 				"Duration":12775,
 				"Trigger_Condition_List": [ 
-					"HCTTestingLoop0" ,
-					"HCTTestingPEPFAR_Delayed"
+					"HCTTestingLoop0"
 				],
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVMuxer",
 					"Muxer_Name": "HCTTestingLoop",
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
-					"Broadcast_Event": "HCTTestingLoop1",
+					"Broadcast_Event": "HCTTestingLoopRapidTest",
 					"Delay_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
 					"Delay_Period_Exponential": 365,
 					"Max_Entries": 1,
@@ -2116,7 +2115,7 @@
 					"class": "HIVRapidHIVDiagnostic",
 					"Event_Or_Config": "Event",
 					"Positive_Diagnosis_Event": "ARTStaging9",
-					"Negative_Diagnosis_Event": "HCTTestingLoop0",
+					"Negative_Diagnosis_Event": "HCTTestingLoop2",
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",

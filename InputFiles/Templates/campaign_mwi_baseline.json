@@ -2005,13 +2005,13 @@
             "Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
 				"Trigger_Condition_List": [ 
-					"HCTTestingLoop0" 
+					"HCTTestingLoop0"
 				],
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVMuxer",
 					"Muxer_Name": "HCTTestingLoop",
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
-					"Broadcast_Event": "HCTTestingLoop1",
+					"Broadcast_Event": "HCTTestingLoopRapidTest",
 					"Delay_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
 					"Delay_Period_Exponential": 365,
 					"Max_Entries": 1,
@@ -2038,12 +2038,12 @@
 			"Demographic_Coverage": 1,
 			"Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
-				"Trigger_Condition_List": [ "HCTTestingLoop1" ],
+				"Trigger_Condition_List": [ "HCTTestingLoopRapidTest" ],
 				"Actual_IndividualIntervention_Config": {
 					"class": "HIVRapidHIVDiagnostic",
 					"Event_Or_Config": "Event",
 					"Positive_Diagnosis_Event": "ARTStaging9",
-					"Negative_Diagnosis_Event": "HCTTestingLoop0",
+					"Negative_Diagnosis_Event": "HCTTestingLoop2",
 					"New_Property_Value": "InterventionStatus:HCTTestingLoop",
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
@@ -2065,7 +2065,7 @@
 		"Start_Year": 1990,
 		"Event_Coordinator_Config": {
 			"class": "StandardInterventionDistributionEventCoordinator",
-			"Intervention_Config": {
+            "Intervention_Config": {
 				"class": "NodeLevelHealthTriggeredIV",
 				"Trigger_Condition_List": [ "HCTTestingLoop2" ],
 				"Actual_IndividualIntervention_Config": {
@@ -3015,7 +3015,6 @@
 					"Delay_Period_Min": 1,
 					"Disqualifying_Properties": [
 						"InterventionStatus:LostForever",
-
 						"InterventionStatus:LostForever_PEPFAR_cancelled"
 					]
 				}
@@ -3121,8 +3120,8 @@
                         "class": "PropertyValueChanger",
                         "Target_Property_Key":"ARTStatus",
                         "Target_Property_Value":"OffART"
-					}
-                }
+				}
+			}
 		}
 	},
   	{
