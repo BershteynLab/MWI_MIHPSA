@@ -253,7 +253,7 @@ p2 <- sim.results %>%
 
 p3 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Diagnosed, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Age >=15, Age < 65, Gender == 1, ceiling(Year) != Year) %>% 
+  filter(Age >=15, Age < 65, ceiling(Year) != Year) %>% 
   group_by(Year, sim.id) %>% 
   summarize(Diagnosed = sum(Diagnosed*pop.scaling.factor), Infected = sum(Infected*pop.scaling.factor), 
             .groups = 'keep') %>% 
@@ -269,7 +269,7 @@ baseline.comp.data <- merge(baseline.comp.data, p1, by = c("Year")) %>%
 
 
 ```{r Save baseline output}
-write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mort_baseline_comp_data.csv")
+write_excel_csv(baseline.comp.data, "/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mort_baseline_comp_data_20250515.csv")
 ```
 
 
@@ -278,7 +278,7 @@ Total, men, and women
 ```{r PLHIV by age and year}
 p1 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Age >=15, Age < 85, Gender == 0, ceiling(Year) != Year) %>% 
+  filter(Age >=15, Gender == 0, ceiling(Year) != Year) %>% 
   group_by(Year, Age, Gender, sim.id) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year, Age) %>% 
@@ -286,7 +286,7 @@ p1 <- sim.results %>%
 
 p2 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Age >=15, Age < 85, Gender == 1, ceiling(Year) != Year) %>% 
+  filter(Age >=15, Gender == 1, ceiling(Year) != Year) %>% 
   group_by(Year, Age, Gender, sim.id) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year, Age) %>% 
@@ -294,7 +294,7 @@ p2 <- sim.results %>%
 
 p3 <- sim.results %>% 
   dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
-  filter(Age >=15, Age < 85, ceiling(Year) != Year) %>% 
+  filter(Age >=15, ceiling(Year) != Year) %>% 
   group_by(Year, Age, sim.id) %>% 
   summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
   group_by(Year, Age) %>% 
@@ -443,9 +443,9 @@ for (i in (1:length(folder.list))){
     mutate(DiagnosedNoARTInit.total = DiagnosedNoARTInit.m + DiagnosedNoARTInit.f) %>% 
     arrange(Age_bin, Death_year) %>% select(c(1,2,5,3,4))
     
-  # Under 200
+  # On ART, less than 6 months after first initiation, CD4 < 200
   p <- mort.data %>% 
-    filter(Total_number_of_times_initiating_ART == 1, Years_since_most_recent_ART_initiation <=6) %>%
+    filter(Total_number_of_times_initiating_ART == 1, Years_since_most_recent_ART_initiation <=.5) %>%
     filter(CD4_binned_InitART == 0) %>% 
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -462,8 +462,8 @@ for (i in (1:length(folder.list))){
     mutate(OnART.Under6.firstinit.under200.total = OnART.Under6.firstinit.under200.m + OnART.Under6.firstinit.under200.f) %>% 
     arrange(Age_bin, Death_year) %>% select(c(1,2,5,3,4))
   
-  # Over 200
-  p <- mort.data %>% filter(Total_number_of_times_initiating_ART == 1, Years_since_most_recent_ART_initiation <=6) %>%
+  # On ART, less than 6 months after first initiation, CD4 > 200
+  p <- mort.data %>% filter(Total_number_of_times_initiating_ART == 1, Years_since_most_recent_ART_initiation <=.5) %>%
     filter(CD4_binned_InitART == 1) %>% 
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -482,8 +482,8 @@ for (i in (1:length(folder.list))){
   
   dat.onart.under6.firstinit.cd4 <- merge(dat.onart.under6.firstinit.cd4, p, by = c("Death_year", "Age_bin"))
   
-  #Under 200
-  p <- mort.data %>% filter(Total_number_of_times_initiating_ART > 1, Years_since_most_recent_ART_initiation <=6) %>%
+  # After interruption, on ART < 6 months after last re-initation, CD4 < 200
+  p <- mort.data %>% filter(Total_number_of_times_initiating_ART > 1, Years_since_most_recent_ART_initiation <=.5) %>%
     filter(CD4_binned_InitART == 0) %>% 
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -505,8 +505,8 @@ for (i in (1:length(folder.list))){
   dat.onart.reinit6mo <- p %>% arrange(Age_bin, Death_year) %>% select(c(1,2,5,3,4))
   
   
-  # Over 200
-  p <- mort.data %>% filter(Total_number_of_times_initiating_ART > 1, Years_since_most_recent_ART_initiation <=6) %>%
+  # After interruption, on ART < 6 months after last re-initation, CD4 > 200
+  p <- mort.data %>% filter(Total_number_of_times_initiating_ART > 1, Years_since_most_recent_ART_initiation <=.5) %>%
     filter(CD4_binned_InitART == 1) %>% 
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -527,29 +527,8 @@ for (i in (1:length(folder.list))){
   
   dat.onart.reinit6mo <- merge(dat.onart.reinit6mo, p  %>% select(c(1,2,5,3,4)), by = c("Death_year", "Age_bin")) %>% arrange(Age_bin, Death_year) 
   
-  # VL Not Suppressed
-  p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death != "ON_VL_SUPPRESSED")  %>%
-    group_by(Death_year, Age_bin, Gender) %>% 
-    count() 
-  
-  p <- left_join(
-    year.age.sex,
-    p,
-    by = c("Death_year", "Age_bin", "Gender")
-  ) %>% replace_na(list(n = 0))
-  
-  names_prefix = 'OnART.VL.no.'
-  
-  p <- p %>% 
-    mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
-    pivot_wider(id_cols = c(Death_year, Age_bin), names_from = c(gcode), values_from = c(n), names_prefix = names_prefix, names_sep = '') 
-  
-  p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
-  
-  dat.onart.vl <- p %>% arrange(Age_bin, Death_year)  %>% select(c(1,2,5,3,4))
-  
-  
-  # VL Suppressed
+
+  # On ART,  VL Suppressed
   p <- mort.data %>% 
     filter(Currently_in_ART == 1, ART_status_just_prior_to_death == "ON_VL_SUPPRESSED")  %>%
     group_by(Death_year, Age_bin, Gender) %>% 
@@ -569,7 +548,49 @@ for (i in (1:length(folder.list))){
   
   p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
   
+  dat.onart.vl <- p %>% arrange(Age_bin, Death_year)  %>% select(c(1,2,5,3,4))
+  
+  # On ART, VL Not Suppressed
+  p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death != "ON_VL_SUPPRESSED")  %>%
+    group_by(Death_year, Age_bin, Gender) %>% 
+    count() 
+  
+  p <- left_join(
+    year.age.sex,
+    p,
+    by = c("Death_year", "Age_bin", "Gender")
+  ) %>% replace_na(list(n = 0))
+  
+  names_prefix = 'OnART.VL.no.'
+  
+  p <- p %>% 
+    mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
+    pivot_wider(id_cols = c(Death_year, Age_bin), names_from = c(gcode), values_from = c(n), names_prefix = names_prefix, names_sep = '') 
+  
+  p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
+  
   dat.onart.vl <- merge(dat.onart.vl, p  %>% select(c(1,2,5,3,4)), by = c("Death_year", "Age_bin")) %>% arrange(Age_bin, Death_year)
+  
+  # On ART < 6 mo, VL Suppressed
+  p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death == "ON_VL_SUPPRESSED", Years_since_most_recent_ART_initiation < .5)  %>%
+    group_by(Death_year, Age_bin, Gender) %>% 
+    count() 
+  
+  p <- left_join(
+    year.age.sex,
+    p,
+    by = c("Death_year", "Age_bin", "Gender")
+  ) %>% replace_na(list(n = 0))
+  
+  names_prefix = 'OnART.6mo.VL.supp.'
+  
+  p <- p %>% 
+    mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
+    pivot_wider(id_cols = c(Death_year, Age_bin), names_from = c(gcode), values_from = c(n), names_prefix = names_prefix, names_sep = '') 
+  
+  p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
+  
+  dat.onart.6mo.vl <- p %>% arrange(Age_bin, Death_year)  %>% select(c(1,2,5,3,4))
   
   # On ART < 6 mo, VL Not Suppressed
   p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death != "ON_VL_SUPPRESSED", Years_since_most_recent_ART_initiation < .5)  %>%
@@ -590,31 +611,9 @@ for (i in (1:length(folder.list))){
   
   p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
   
-  dat.onart.6mo.vl <- p %>% arrange(Age_bin, Death_year)  %>% select(c(1,2,5,3,4))
-  
-  
-  # VL Suppressed
-  p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death == "ON_VL_SUPPRESSED", Years_since_most_recent_ART_initiation < .5)  %>%
-    group_by(Death_year, Age_bin, Gender) %>% 
-    count() 
-  
-  p <- left_join(
-    year.age.sex,
-    p,
-    by = c("Death_year", "Age_bin", "Gender")
-  ) %>% replace_na(list(n = 0))
-  
-  names_prefix = 'OnART.6mo.VL.supp.'
-  
-  p <- p %>% 
-    mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
-    pivot_wider(id_cols = c(Death_year, Age_bin), names_from = c(gcode), values_from = c(n), names_prefix = names_prefix, names_sep = '') 
-  
-  p[paste0(names_prefix,'total')] = p[paste0(names_prefix,'m')] + p[paste0(names_prefix,'f')]
-  
   dat.onart.6mo.vl <- merge(dat.onart.6mo.vl, p  %>% select(c(1,2,5,3,4)) , by = c("Death_year", "Age_bin")) %>% arrange(Age_bin, Death_year)
   
-  # On ART < 6 mo, VL Not Suppressed
+  # On ART > 6 mo, VL Suppressed
   p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death == "ON_VL_SUPPRESSED", Years_since_most_recent_ART_initiation >= .5)  %>%
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -625,7 +624,7 @@ for (i in (1:length(folder.list))){
     by = c("Death_year", "Age_bin", "Gender")
   ) %>% replace_na(list(n = 0))
   
-  names_prefix = 'OnART.over6mo.VL.no.'
+  names_prefix = 'OnART.over6mo.VL.supp.'
   
   p <- p %>% 
     mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
@@ -636,7 +635,7 @@ for (i in (1:length(folder.list))){
   dat.onart.over6mo.vl <- p %>% arrange(Age_bin, Death_year)  %>% select(c(1,2,5,3,4))
   
   
-  # VL Suppressed
+  # On ART > 6 mo, VL Not Suppressed
   p <- mort.data %>% filter(Currently_in_ART == 1, ART_status_just_prior_to_death != "ON_VL_SUPPRESSED", Years_since_most_recent_ART_initiation >= .5)  %>%
     group_by(Death_year, Age_bin, Gender) %>% 
     count() 
@@ -647,7 +646,7 @@ for (i in (1:length(folder.list))){
     by = c("Death_year", "Age_bin", "Gender")
   ) %>% replace_na(list(n = 0))
   
-  names_prefix = 'OnART.over6mo.VL.supp.'
+  names_prefix = 'OnART.over6mo.VL.no.'
   
   p <- p %>% 
     mutate(gcode = case_when(Gender == 0 ~ 'm', Gender == 1 ~ 'f')) %>% 
@@ -769,7 +768,7 @@ for (i in (1:length(folder.list))){
   dat.onart <- p  %>% arrange(Age_bin, Death_year) %>% select(c(1,2,5,3,4))
   
   # on art, all, over cd4 > 200
-  p <- mort.data %>% filter(Currently_in_ART == 1, CD4_count_current_binned == 0 ) %>% 
+  p <- mort.data %>% filter(Currently_in_ART == 1, CD4_count_current_binned == 1 ) %>% 
     group_by(Death_year, Age_bin, Gender) %>% 
     count()
     
@@ -885,7 +884,7 @@ for (i in (1:length(folder.list))){
     merge(dat.onart, by = c("Death_year", "Age_bin") )
   
   psf = sim.results.pop.scaling %>% filter(sim.id.ix == i) %>% .$pop.scaling.factor
-  for (col.ix in 3:68){
+  for (col.ix in 3:8){
     dat.all[,col.ix] = dat.all[,col.ix]*psf
   }
 
@@ -915,6 +914,39 @@ mort.data.sets <- bind_rows(mort.data.sets)
 #          Year_DropOut, Age_Year_DropOut, CD4_binned_DropOut, WHO_Stage_DropOut)
 ```
 
+## Total HIV+ population at mid year
+```{r}
+p1 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Age >=15, Gender == 0, ceiling(Year) != Year) %>% 
+  group_by(Year, Age, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Age) %>% 
+  summarize(mean.plhiv.males = mean(Infected), .groups = 'keep')
+
+p2 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Age >=15, Gender == 1, ceiling(Year) != Year) %>% 
+  group_by(Year, Age, Gender, sim.id) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Age) %>% 
+  summarize(mean.plhiv.females = mean(Infected), .groups = 'keep')
+
+p3 <- sim.results %>% 
+  dplyr::select(Year, Gender, Age, Infected, sim.id, pop.scaling.factor) %>%
+  filter(Age >=15, ceiling(Year) != Year) %>% 
+  group_by(Year, Age, sim.id) %>% 
+  summarize(Infected = sum(Infected*pop.scaling.factor), .groups = 'keep') %>% 
+  group_by(Year, Age) %>% 
+  summarize(mean.plhiv.total = mean(Infected), .groups = 'keep')
+
+dat.plhiv <- p3  %>%
+  merge(p1, by = c("Year", "Age") ) %>% 
+  merge(p2, by = c("Year", "Age")) %>% 
+  arrange(Age, Year)
+```
+
+## Total HIV deaths each year from Mortality Reports
 ```{r Calculate total HIV deaths each year from mort reports}
 # Schema: Year, Age, mean.total, mean.males, mean.females
 mort.hiv.deaths <- mort.data.sets %>% 
@@ -935,19 +967,18 @@ mort.hiv.deaths %>% head
 ```
 
 ```{r}
-
 mort.data.means = mort.data.sets %>% group_by(Death_year, Age_bin) %>% 
   summarise_all(.funs = 'mean', .vars = colnames(mort.data.sets)[3:62]) %>% 
   arrange(Age_bin, Death_year)
 
-mort.data.means <- merge(dat.plhiv %>% mutate(Year = Year- .5), dat.hivdeaths , by = c("Year","Age")) %>% 
+mort.data.means <- merge(dat.plhiv %>% mutate(Year = Year- .5), mort.hiv.deaths , by = c("Year","Age")) %>% 
   rename(Age_bin = Age, Death_year = Year) %>% 
   merge(mort.data.means, by = c("Death_year","Age_bin")) %>% 
   arrange(Age_bin, Death_year)
 
 mort.data.means %>% head()
 
-write_excel_csv(mort.data.means, '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mihpsa_mortality_table.csv')
+write_excel_csv(mort.data.means, '/gpfs/data/bershteynlab/EMOD/citrod01/MWI_calib_20220422/Analysis/mihpsa_mortality_table_20250515.csv')
 
 ```
 
@@ -1547,7 +1578,10 @@ sim.results %>% filter(sim.id == 1) %>%
   group_by(Year, Gender, Age) %>% summarise(sum(Died_from_HIV))
 
 sim.results %>% filter(sim.id == 1) %>% 
-  group_by(Year) %>% summarise(sum(Died_from_HIV)) 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(Year) %>% summarise(
+    Died = sum(Died), 
+    Died_from_HIV = sum(Died_from_HIV)) 
 
 sim.results %>% filter(sim.id == 1) %>% summarise(sum(Died_from_HIV)) 
 ```
@@ -1556,8 +1590,16 @@ sim.results %>% filter(sim.id == 1) %>% summarise(sum(Died_from_HIV))
 ```{r}
 mort.report %>% colnames
 
+merge(
+  mort.report %>%
+  group_by(Death_year) %>% summarize(Died = n()),
+  mort.report %>% filter(Death_was_HIV_cause == 1) %>%
+  group_by(Death_year) %>% summarize(Died_from_HIV = n()),
+  by = c("Death_year")
+)
+
 mort.report %>% filter(Death_was_HIV_cause == 1) %>%
-  group_by(Death_year, Age_bin, Gender) %>% count()
+  group_by(Death_year) %>% summarize(Died_from_HIV = n())
 
 mort.report %>% filter(Death_was_HIV_cause == 1) %>% group_by(Death_year) %>% count()
 
