@@ -1,4 +1,2 @@
 Scenario,Campaign
-mwi_pepfar_baseline,campaign_mwi_baseline.json
-mwi_no_pepfar,campaign_mwi_no_pepfar.json
-mwi_partial_pepfar,campaign_mwi_partial_pepfar.json
+hivcontrol_statusquo,campaign_Malawi_20250617_PrEP.json

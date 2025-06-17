@@ -15,6 +15,7 @@ MWI_test/
 MWI_resample/
 MWI_transmission/
 MWI_minimal/
+Analysis/
 
 .Rproj.user
 .Rhistory
