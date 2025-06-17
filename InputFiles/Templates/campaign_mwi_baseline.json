@@ -3535,6 +3535,312 @@
                 }
             },
             "END": "FAST-TRACK ART TO ACHIEVE 90-90-90"
+        },
+        {
+            "BEGIN": "Background Oral PrEP",
+            "END": "Background Oral PrEP",
+            "Event_Coordinator_Config": {
+                "Distributions": [
+                    {
+                    "Age_Ranges_Years": [
+                        {
+                            "Max": 35,
+                            "Min": 15
+                        }
+                    ],
+                    "End_Year": 2020,
+                    "Num_Targeted_Females": [
+                        1060
+                    ],
+                    "Num_Targeted_Males": [
+                        0   
+                    ],
+                    "Property_Restrictions_Within_Node": [
+                        {
+                            "Risk": "HIGH"
+                        },
+                        {
+                            "Risk": "MEDIUM"
+                        }
+                    ],
+                    "Start_Year": 2019,
+                    "Target_Disease_State": [
+                        [
+                            "HIV_Negative",
+                            "Not_Have_Intervention"
+                        ]
+                    ],
+                    "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                    "Age_Ranges_Years": [
+                        {
+                            "Max": 65,
+                            "Min": 15
+                        }
+                    ],
+                    "End_Year": 2021,
+                    "Num_Targeted_Females": [
+                        219
+                    ],
+                    "Num_Targeted_Males": [
+                        0
+                    ],
+                    "Property_Restrictions_Within_Node": [
+                        {
+                            "Risk": "HIGH"
+                        },
+                        {
+                            "Risk": "MEDIUM"
+                        }
+                    ],
+                    "Start_Year": 2020,
+                    "Target_Disease_State": [
+                        [
+                            "HIV_Negative",
+                            "Not_Have_Intervention"
+                        ]
+                    ],
+                    "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                    "Age_Ranges_Years": [
+                        {
+                            "Max": 35,
+                            "Min": 15
+                        }
+                    ],
+                    "End_Year": 2022,
+                    "Num_Targeted_Females": [
+                        6472
+                    ],
+                    "Num_Targeted_Males": [
+                        0
+                    ],
+                    "Property_Restrictions_Within_Node": [
+                        {
+                            "Risk": "HIGH"
+                        },
+                        {
+                            "Risk": "MEDIUM"
+                        }
+                    ],
+                    "Start_Year": 2021,
+                    "Target_Disease_State": [
+                        [
+                            "HIV_Negative",
+                            "Not_Have_Intervention"
+                        ]
+                    ],
+                    "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                    "Age_Ranges_Years": [
+                        {
+                            "Max": 35,
+                            "Min": 15
+                        }
+                    ],
+                    "End_Year": 2023,
+                    "Num_Targeted_Females": [
+                        31026
+                    ],
+                    "Num_Targeted_Males": [
+                        0
+                    ],
+                    "Property_Restrictions_Within_Node": [
+                        {
+                            "Risk": "HIGH"
+                        },
+                        {
+                            "Risk": "MEDIUM"
+                        }
+                    ],
+                    "Start_Year": 2022,
+                    "Target_Disease_State": [
+                        [
+                            "HIV_Negative",
+                            "Not_Have_Intervention"
+                        ]
+                    ],
+                    "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                        "Age_Ranges_Years": [
+                            {
+                                "Max": 35,
+                                "Min": 15
+                            }
+                        ],
+                        "End_Year": 2024,
+                        "Num_Targeted_Females": [
+                            76122
+                        ],
+                        "Num_Targeted_Males": [
+                            0
+                        ],
+                        "Property_Restrictions_Within_Node": [
+                            {
+                                "Risk": "HIGH"
+                            },
+                            {
+                                "Risk": "MEDIUM"
+                            }
+                        ],
+                        "Start_Year": 2023,
+                        "Target_Disease_State": [
+                            [
+                                "HIV_Negative",
+                                "Not_Have_Intervention"
+                            ]
+                        ],
+                        "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                        "Age_Ranges_Years": [
+                            {
+                                "Max": 35,
+                                "Min": 15
+                            }
+                        ],
+                        "End_Year": 2025,
+                        "Num_Targeted_Females": [
+                            106858
+                        ],
+                        "Num_Targeted_Males": [
+                            0
+                        ],
+                        "Property_Restrictions_Within_Node": [
+                            {
+                                "Risk": "HIGH"
+                            },
+                            {
+                                "Risk": "MEDIUM"
+                            }
+                        ],
+                        "Start_Year": 2024,
+                        "Target_Disease_State": [
+                            [
+                                "HIV_Negative",
+                                "Not_Have_Intervention"
+                            ]
+                        ],
+                        "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    },
+                    {
+                        "Age_Ranges_Years": [
+                            {
+                                "Max": 35,
+                                "Min": 15
+                            }
+                        ],
+                        "End_Year": 2076,
+                        "Num_Targeted_Females": [
+                            5342900
+                        ],
+                        "Num_Targeted_Males": [
+                            0
+                        ],
+                        "Property_Restrictions_Within_Node": [
+                            {
+                                "Risk": "HIGH"
+                            },
+                            {
+                                "Risk": "MEDIUM"
+                            }
+                        ],
+                        "Start_Year": 2025,
+                        "Target_Disease_State": [
+                            [
+                                "HIV_Negative",
+                                "Not_Have_Intervention"
+                            ]
+                        ],
+                        "Target_Disease_State_Has_Intervention_Name": "PrEP"
+                    }
+                ],
+                "Intervention_Config": {
+                    "Cost_To_Consumer": 1.0,
+                    "Intervention_Name": "Oral_PrEP",
+                    "Vaccine_Type": "AcquisitionBlocking",
+                    "Waning_Config": {
+                        "Durability_Map": {
+                            "Times": [
+                                0,
+                                90,
+                                91
+                            ],
+                            "Values": [
+                                1,
+                                1,
+                                0
+                            ]
+                        },
+                        "Expire_At_Durability_Map_End": 1,
+                        "Initial_Effect": 0.75,
+                        "class": "WaningEffectMapLinear"
+                    },
+                    "Distributed_Event_Trigger": "Initiate_Background_PrEP",
+                    "Expired_Event_Trigger": "Background_PrEP_Expired",
+                    "Waning_Config__KP_PrEP_HIGH_Waning": "<-- MARKER",
+                    "class": "ControlledVaccine"
+                },
+                "class": "NChooserEventCoordinatorHIV"
+            },
+            "Event_Name": "NChooser to implement specified number of Oral PrEP uptake",
+            "Nodeset_Config": {
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 2015,
+            "class": "CampaignEvent"
+        },
+        {
+            "Event_Coordinator_Config": {
+                "Intervention_Config": {
+                    "Actual_IndividualIntervention_Config": {
+                        "New_Property_Value": "",
+                        "Target_Property_Key": "OnPrEP",
+                        "Target_Property_Value": "True",
+                        "class": "PropertyValueChanger"
+                    },
+                    "Trigger_Condition_List": [
+                        "Initiate_Background_PrEP"
+                    ],
+                    "class": "NodeLevelHealthTriggeredIV"
+                },
+                "class": "StandardInterventionDistributionEventCoordinator"
+            },
+            "Event_Name": "Set OnPrEP Status after initiation, background",
+            "Nodeset_Config": {
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 2000,
+            "End_Year": 2074,
+            "class": "CampaignEventByYear"
+        },
+        {
+            "Event_Coordinator_Config": {
+                "Intervention_Config": {
+                    "Actual_IndividualIntervention_Config": {
+                        "New_Property_Value": "",
+                        "Target_Property_Key": "OnPrEP",
+                        "Target_Property_Value": "False",
+                        "class": "PropertyValueChanger"
+                    },
+                    "Trigger_Condition_List": [
+                        "Background_PrEP_Expired"
+                    ],
+                    "class": "NodeLevelHealthTriggeredIV"
+                },
+                "class": "StandardInterventionDistributionEventCoordinator"
+            },
+            "Event_Name": "Remove OnPrEP Status after expiry, background",
+            "Nodeset_Config": {
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 2000,
+            "End_Year": 2074,
+            "class": "CampaignEventByYear"
         }
     ]
 }

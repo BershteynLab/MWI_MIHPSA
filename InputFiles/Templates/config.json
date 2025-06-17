@@ -226,6 +226,8 @@
          "ReceivePlacebo",
          "ReceivePrEP_HIGH",
          "ReceivePrEP_MEDIUM",
+         "Initiate_Background_PrEP",
+         "Background_PrEP_Expired",
          "Schedued_To_Get_TMC",
          "ShouldNotHappen",
          "TestingOnANC0",
