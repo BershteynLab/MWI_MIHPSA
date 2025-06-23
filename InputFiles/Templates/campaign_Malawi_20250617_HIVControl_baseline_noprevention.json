@@ -980,7 +980,7 @@
                             0
                         ],
                         "Num_Targeted_Males": [
-                            0
+                            1
                         ],
                         "Property_Restrictions_Within_Node": [],
                         "Target_Disease_State": [
@@ -1314,7 +1314,7 @@
                             0
                         ],
                         "Num_Targeted_Males": [
-                            68322
+                            1
                         ],
                         "Property_Restrictions_Within_Node": [],
                         "Target_Disease_State": [
@@ -1649,7 +1649,7 @@
                             0
                         ],
                         "Num_Targeted_Males": [
-                            38076
+                            1
                         ],
                         "Property_Restrictions_Within_Node": [],
                         "Target_Disease_State": [
@@ -3490,7 +3490,7 @@
                         ],
                         "End_Year": 2024,
                         "Num_Targeted_Females": [
-                            0
+                            1
                         ],
                         "Num_Targeted_Males": [
                             0
@@ -3521,7 +3521,7 @@
                         ],
                         "End_Year": 2025,
                         "Num_Targeted_Females": [
-                            0
+                            1
                         ],
                         "Num_Targeted_Males": [
                             0
@@ -3552,7 +3552,7 @@
                         ],
                         "End_Year": 2076,
                         "Num_Targeted_Females": [
-                            0
+                            1
                         ],
                         "Num_Targeted_Males": [
                             0
