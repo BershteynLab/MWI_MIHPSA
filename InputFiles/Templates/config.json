@@ -508,7 +508,8 @@
       "Report_HIV_ByAgeAndGender_Event_Counter_List": [
          "Program_VMMC",
          "GaveBirth",
-         "Initiate_Background_PrEP"
+         "Initiate_Background_PrEP",
+         "Initiate_Intervention_PrEP"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 1985,
