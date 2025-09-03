@@ -226,10 +226,6 @@
          "ReceivePlacebo",
          "ReceivePrEP_HIGH",
          "ReceivePrEP_MEDIUM",
-         "Initiate_Background_PrEP",
-         "Initiate_Intervention_PrEP",
-         "Background_PrEP_Expired",
-         "Intervention_PrEP_Expired",
          "Schedued_To_Get_TMC",
          "ShouldNotHappen",
          "TestingOnANC0",
@@ -273,7 +269,17 @@
          "WillReceiveTraditionalMaleCircumcision",
          "PEPFAR_ART_Dropout", 
          "PEPFAR_ART_Continue",
-         "HCTTestingPEPFAR_Delayed"
+         "HCTTestingPEPFAR_Delayed",
+         "PrEP_Choice_AGYW",
+         "PrEP_Choice_FSW",
+         "PrEP_Choice_TDF",
+         "PrEP_Choice_CAB",
+         "Initiate_Intervention_PrEP_TDF",
+         "Intervention_PrEP_TDF_Expired",
+         "Initiate_Intervention_PrEP_CAB",
+         "Intervention_PrEP_CAB_Expired",
+         "Initiate_Background_PrEP",
+         "Background_PrEP_Expired"
       ],
       "Custom_Node_Events": [],
       "Custom_Reports_Filename": "",
@@ -501,7 +507,8 @@
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
       "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
          "Risk",
-         "OnPrEP"
+         "OnPrEP",
+         "OnPrEP_CAB"
       ],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,
@@ -509,7 +516,14 @@
          "Program_VMMC",
          "GaveBirth",
          "Initiate_Background_PrEP",
-         "Initiate_Intervention_PrEP"
+         "PrEP_Choice_AGYW",
+         "PrEP_Choice_FSW",
+         "PrEP_Choice_TDF",
+         "PrEP_Choice_CAB",
+         "Initiate_Intervention_PrEP_TDF",
+         "Intervention_PrEP_TDF_Expired",
+         "Initiate_Intervention_PrEP_CAB",
+         "Intervention_PrEP_CAB_Expired"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 1985,

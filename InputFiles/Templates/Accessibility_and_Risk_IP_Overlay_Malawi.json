@@ -38,6 +38,12 @@
           "Transitions": []
         },
         {
+          "Property": "OnPrEP_CAB",
+          "Values": ["False", "True"],
+          "Initial_Distribution": [1, 0],
+          "Transitions": []
+        },
+        {
           "Property": "WillingToStartARTFromPrEPCampaign",
           "Values": [ "NO", "YES" ],
           "Initial_Distribution": [ 0, 1],
@@ -121,6 +127,12 @@
           "Transitions": []
         },
         {
+          "Property": "OnPrEP_CAB",
+          "Values": ["False", "True"],
+          "Initial_Distribution": [1, 0],
+          "Transitions": []
+        },
+        {
             "Property": "WillingToStartARTFromPrEPCampaign",
             "Values": [ "NO", "YES" ],
             "Initial_Distribution": [ 0, 1],
@@ -199,6 +211,12 @@
         },
         {
           "Property": "OnPrEP",
+          "Values": ["False", "True"],
+          "Initial_Distribution": [1, 0],
+          "Transitions": []
+        },
+                {
+          "Property": "OnPrEP_CAB",
           "Values": ["False", "True"],
           "Initial_Distribution": [1, 0],
           "Transitions": []
