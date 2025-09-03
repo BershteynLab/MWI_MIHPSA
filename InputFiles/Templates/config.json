@@ -289,11 +289,11 @@
       "Default_Geography_Initial_Node_Population": 1000,
       "Default_Geography_Torus_Size": 10,
       "Demographics_Filenames": [
-            "Demographics_Malawi.json",
-            "PFA_Overlay_Malawi.json",
-            "Accessibility_and_Risk_IP_Overlay_Malawi.json",
-            "Risk_Assortivity_Overlay_Malawi.json"
-         ],
+         "Demographics_Malawi.json",
+         "PFA_Overlay_Malawi.json",
+         "Accessibility_and_Risk_IP_Overlay_Malawi.json",
+         "Risk_Assortivity_Overlay_Malawi.json"
+      ],
       "Disable_IP_Whitelist": 1,
       "Enable_Abort_Zero_Infectivity": 0,
       "Enable_Aging": 1,
@@ -507,6 +507,10 @@
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
       "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
          "Risk",
+         "OnPrEP"
+      ],
+      ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [
+         "Risk",
          "OnPrEP",
          "OnPrEP_CAB"
       ],
@@ -516,14 +520,10 @@
          "Program_VMMC",
          "GaveBirth",
          "Initiate_Background_PrEP",
-         "PrEP_Choice_AGYW",
-         "PrEP_Choice_FSW",
-         "PrEP_Choice_TDF",
-         "PrEP_Choice_CAB",
          "Initiate_Intervention_PrEP_TDF",
-         "Intervention_PrEP_TDF_Expired",
          "Initiate_Intervention_PrEP_CAB",
-         "Intervention_PrEP_CAB_Expired"
+         "PrEP_Choice_AGYW",
+         "PrEP_Choice_FSW"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 1985,

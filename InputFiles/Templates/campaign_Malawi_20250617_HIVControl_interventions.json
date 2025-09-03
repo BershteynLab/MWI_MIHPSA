@@ -3643,7 +3643,8 @@
                 "Intervention_Config": {
                     "Actual_IndividualIntervention_Config": {
                         "New_Property_Value": "",
-                        "Target_Property_Key": "OnPrEP_CAB",
+                        ".Target_Property_Key": "OnPrEP_CAB",
+                        "Target_Property_Key": "OnPrEP",
                         "Target_Property_Value": "True",
                         "class": "PropertyValueChanger"
                     },
@@ -3667,7 +3668,8 @@
                 "Intervention_Config": {
                     "Actual_IndividualIntervention_Config": {
                         "New_Property_Value": "",
-                        "Target_Property_Key": "OnPrEP_CAB",
+                        ".Target_Property_Key": "OnPrEP_CAB",
+                        "Target_Property_Key": "OnPrEP",
                         "Target_Property_Value": "False",
                         "class": "PropertyValueChanger"
                     },
