@@ -73,6 +73,8 @@
               "LinkingToART",
               "LinkingToPreART",
               "OnART",
+              "OnEffectiveART",
+              "OnNonSuppressiveART",
               "OnPreART",
               "HCTTestingLoop",
               "HCTUptakeAtDebut",
@@ -83,7 +85,7 @@
               "LostForever",
               "LostForever_PEPFAR_cancelled"
           ], 
-          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         {
           "Property": "ARTStatus",
@@ -91,9 +93,11 @@
           "Values": [
             "ARTNaive",
             "OnART",
-            "OffART"
+            "OffART",
+            "OnEffectiveART",
+            "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
         }
       ]
     },
@@ -162,6 +166,8 @@
             "LinkingToART",
             "LinkingToPreART",
             "OnART",
+            "OnEffectiveART",
+            "OnNonSuppressiveART",
             "OnPreART",
             "HCTTestingLoop",
             "HCTUptakeAtDebut",
@@ -172,7 +178,7 @@
             "LostForever",
             "LostForever_PEPFAR_cancelled"
           ], 
-          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         {
           "Property": "ARTStatus",
@@ -180,9 +186,11 @@
           "Values": [
             "ARTNaive",
             "OnART",
-            "OffART"
+            "OffART",
+            "OnEffectiveART",
+            "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
         }
       ]
     },
@@ -251,6 +259,8 @@
               "LinkingToART",
               "LinkingToPreART",
               "OnART",
+              "OnEffectiveART",
+              "OnNonSuppressiveART",
               "OnPreART",
               "HCTTestingLoop",
               "HCTUptakeAtDebut",
@@ -261,7 +271,7 @@
               "LostForever",
               "LostForever_PEPFAR_cancelled"
           ], 
-          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         {
           "Property": "ARTStatus",
@@ -269,9 +279,11 @@
           "Values": [
             "ARTNaive",
             "OnART",
-            "OffART"
+            "OffART",
+            "OnEffectiveART",
+            "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
         }
       ]
     }

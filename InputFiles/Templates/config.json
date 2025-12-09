@@ -195,6 +195,7 @@
          "OnART9",
          "OnDrug",
          "OnEffectiveART",
+         "OnNonSuppressiveART",
          "OnPreART0",
          "OnPreART1",
          "OnPreART10",
@@ -507,12 +508,8 @@
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
       "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
          "Risk",
+         "ARTStatus",
          "OnPrEP"
-      ],
-      ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [
-         "Risk",
-         "OnPrEP",
-         "OnPrEP_CAB"
       ],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,
@@ -526,8 +523,8 @@
          "PrEP_Choice_FSW"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
-      "Report_HIV_ByAgeAndGender_Start_Year": 1985,
-      "Report_HIV_ByAgeAndGender_Stop_Year": 2076,
+      "Report_HIV_ByAgeAndGender_Start_Year": 2020,
+      "Report_HIV_ByAgeAndGender_Stop_Year": 2050,
       "Report_HIV_ByAgeAndGender_Stratify_Infected_By_CD4": 1,
       "Report_HIV_Event_Channels_List": [],
       "Report_HIV_Infection": 0,
@@ -549,7 +546,7 @@
       "Sexual_Debut_Age_Male_Weibull_Scale": 16.946729660034,
       "Sexual_Debut_Age_Min": 13,      
       "Sexual_Debut_Age_Setting_Type": "WEIBULL",         
-      "Simulation_Duration": 41975,
+      "Simulation_Duration": 31025,
       "Simulation_Timestep": 30.4166666666667,
       "Simulation_Type": "HIV_SIM",
       "SMALL_Base_Population_Scale_Factor": 0.0001,
