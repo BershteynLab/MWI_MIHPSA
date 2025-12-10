@@ -196,6 +196,7 @@
          "OnDrug",
          "OnEffectiveART",
          "OnNonSuppressiveART",
+         "OnART1_defaulter_tracer",
          "OnPreART0",
          "OnPreART1",
          "OnPreART10",
