@@ -3037,7 +3037,6 @@
                         0.37
                     ],
                     "Disqualifying_Properties": [
-                        "ARTIneligible:Yes",
                         "InterventionStatus:OnEffectiveART",
                         "InterventionStatus:OnNonSuppressiveART",
                         "InterventionStatus:LostForever"
@@ -3077,7 +3076,6 @@
                         0.151
                     ],
                     "Disqualifying_Properties": [
-                        "ARTIneligible:Yes",
                         "InterventionStatus:OnEffectiveART",
                         "InterventionStatus:OnNonSuppressiveART",
                         "InterventionStatus:LostForever"
@@ -3117,7 +3115,6 @@
                         0.254
                     ],
                     "Disqualifying_Properties": [
-                        "ARTIneligible:Yes",
                         "InterventionStatus:OnEffectiveART",
                         "InterventionStatus:OnNonSuppressiveART",
                         "InterventionStatus:LostForever"
@@ -3157,7 +3154,6 @@
                         0.109
                     ],
                     "Disqualifying_Properties": [
-                        "ARTIneligible:Yes",
                         "InterventionStatus:OnEffectiveART",
                         "InterventionStatus:OnNonSuppressiveART",
                         "InterventionStatus:LostForever"

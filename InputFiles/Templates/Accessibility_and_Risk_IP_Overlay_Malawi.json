@@ -92,12 +92,11 @@
           "Transitions": [],
           "Values": [
             "ARTNaive",
-            "OnART",
             "OffART",
             "OnEffectiveART",
             "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0 ]
         }
       ]
     },
@@ -185,12 +184,11 @@
           "Transitions": [],
           "Values": [
             "ARTNaive",
-            "OnART",
             "OffART",
             "OnEffectiveART",
             "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0 ]
         }
       ]
     },
@@ -278,12 +276,11 @@
           "Transitions": [],
           "Values": [
             "ARTNaive",
-            "OnART",
             "OffART",
             "OnEffectiveART",
             "OnNonSuppressiveART"
           ],
-          "Initial_Distribution": [ 1, 0, 0, 0, 0 ]
+          "Initial_Distribution": [ 1, 0, 0, 0 ]
         }
       ]
     }

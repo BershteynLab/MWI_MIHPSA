@@ -1,0 +1,185 @@
+---
+title: "MWI_HIV_AI"
+output: html_document
+date: "2025-12-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Libraries
+
+```{r}
+suppressMessages(library(tidyverse))
+suppressMessages(library(data.table))
+suppressMessages(library(magrittr))
+library(ggplot2)
+library(devtools)
+
+CENSUS_YEAR = 2018.5
+MALAWI_CENSUS_POP = 17563749
+
+pop_scaling_factor = 97.23887 # Change reports to overlap with census year
+
+```
+
+# Initial test - baseline
+
+```{r}
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_baseline-hivcontrol_baseline___2025_12_10_16_30_28_229595"
+
+sim.results <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'baseline.test',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed", "Initiate_Background_PrEP"),
+  stratify_columns = c("Year", "Gender", "Age", "IP_Key.Risk", "IP_Key.ARTStatus", "IP_Key.OnPrEP"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+sim.results$pop.scaling.factor <- pop_scaling_factor
+```
+
+## PLHIV - all adults
+
+```{r}
+sim.results %>% 
+  group_by(Year, scenario_name, sim.ix, Gender) %>% 
+  summarize(Infected = sum(Infected * pop.scaling.factor)) %>% 
+  group_by(Year, scenario_name, Gender) %>% 
+  summarize(Infected = mean(Infected)) %>% 
+  ungroup()
+```
+
+## PLHIV by age
+```{r}
+
+```
+
+## HIV Deaths by ART status
+```{r}
+sim.results %>% 
+  filter(Age >= 35) %>% 
+  group_by(scenario_name, sim.ix, Year, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = sum(Infected * pop.scaling.factor),
+    Died_from_HIV = Died_from_HIV * pop.scaling.factor, .groups = 'drop_last') %>% 
+  group_by(scenario_name, Year, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = mean(Infected),
+    Died_from_HIV = mean(Died_from_HIV), .groups = 'drop_last') %>% 
+  mutate(mort = Died_from_HIV/Infected)
+```
+
+```{r}
+sim.results %>% 
+  filter(Age >= 15, Age < 35) %>%
+  group_by(scenario_name, sim.ix, Year, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = sum(Infected * pop.scaling.factor),
+    Died_from_HIV = Died_from_HIV * pop.scaling.factor, .groups = 'drop_last') %>% 
+  group_by(scenario_name, Year, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = mean(Infected),
+    Died_from_HIV = mean(Died_from_HIV), .groups = 'drop_last') %>% 
+  mutate(mort = Died_from_HIV/Infected)
+
+```
+
+## New Acquisitions
+
+```{r}
+sim.results %>% 
+  group_by(Year, scenario_name, sim.ix, Gender) %>% 
+  summarize(
+    Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
+    Died_from_HIV = sum(Died_from_HIV * pop.scaling.factor)) %>% 
+  group_by(Year, scenario_name, Gender) %>% 
+  summarize(
+    Newly.Infected = mean(Newly.Infected), 
+    Died_from_HIV = mean(Died_from_HIV)) %>% 
+  ungroup()
+```
+
+## ART Coverage - 90-90-90
+
+### VLS - under 35
+```{r}
+onart_dat <- sim.results %>% 
+  filter(Age < 35, Age >= 15) %>% 
+  group_by(Year, scenario_name, sim.ix, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = sum(Infected * pop.scaling.factor),
+    Diagnosed = sum(Diagnosed * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor)
+    ) %>% 
+  group_by(Year, scenario_name, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = mean(Infected), 
+    Diagnosed = mean(Diagnosed),
+    On_ART = mean(On_ART)) %>% 
+  ungroup()
+
+onart_dat %>% 
+  pivot_wider(
+    id_cols = c(Year, scenario_name, Gender), 
+    names_from = IP_Key.ARTStatus,
+    values_from = On_ART
+  ) %>% 
+  mutate(
+    tot = OnEffectiveART + OnNonSuppressiveART 
+  ) %>% 
+  mutate(
+    VLS = OnEffectiveART/tot
+  )
+
+```
+### VLS - over 35
+```{r}
+onart_dat <- sim.results %>% 
+  filter(Age >= 35) %>% 
+  group_by(Year, scenario_name, sim.ix, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = sum(Infected * pop.scaling.factor),
+    Diagnosed = sum(Diagnosed * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor)
+    ) %>% 
+  group_by(Year, scenario_name, Gender, IP_Key.ARTStatus) %>% 
+  summarize(
+    Infected = mean(Infected), 
+    Diagnosed = mean(Diagnosed),
+    On_ART = mean(On_ART)) %>% 
+  ungroup()
+
+onart_dat %>% 
+  pivot_wider(
+    id_cols = c(Year, scenario_name, Gender), 
+    names_from = IP_Key.ARTStatus,
+    values_from = On_ART
+  ) %>% 
+  mutate(
+    tot = OnEffectiveART + OnNonSuppressiveART 
+  ) %>% 
+  mutate(
+    VLS = OnEffectiveART/tot
+  )
+
+```
+
+
+## PrEP
+
+```{r}
+sim.results %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(scenario_name, sim.ix, Year) %>% 
+  summarize(Initiate_Background_PrEP = sum(Initiate_Background_PrEP * pop.scaling.factor)) %>% 
+  group_by(scenario_name, Year) %>% 
+  summarize(Initiate_Background_PrEP = mean(Initiate_Background_PrEP))
+```
+

@@ -15,7 +15,6 @@ MWI_test/
 MWI_resample/
 MWI_transmission/
 MWI_minimal/
-Analysis/
 
 .Rproj.user
 .Rhistory
@@ -27,3 +26,4 @@ slurm_*
 Analysis/.RData
 Analysis/.Rhistory
 Analysis/Analysis.Rproj
+Analysis/*.csv
