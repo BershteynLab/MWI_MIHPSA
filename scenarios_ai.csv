@@ -1,4 +1,5 @@
 Scenario,Campaign,Choice_Probabilities__KP_ART_Retention,Start_Year__KP_PrEP_VOICE4_Start,Start_Year__KP_SelfTesting_Start
-retention,campaign_Malawi_20251209_AI_interventions.json,"[0,1]",2200,2200
-prep,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2025,2200
-selftesting,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2025
+dalys_baseline,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2200
+dalys_retention,campaign_Malawi_20251209_AI_interventions.json,"[0,1]",2200,2200
+dalys_prep,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2025,2200
+dalys_selftesting,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2025
