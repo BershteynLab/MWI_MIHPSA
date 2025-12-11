@@ -196,7 +196,6 @@
          "OnDrug",
          "EffectiveART",
          "NonSuppressiveART",
-         "OnART1_defaulter_tracer",
          "OnPreART0",
          "OnPreART1",
          "OnPreART10",
@@ -281,7 +280,11 @@
          "Initiate_Intervention_PrEP_CAB",
          "Intervention_PrEP_CAB_Expired",
          "Initiate_Background_PrEP",
-         "Background_PrEP_Expired"
+         "Background_PrEP_Expired",
+         "Initiate_Intervention_PrEP",
+         "Intervention_PrEP_Expired",
+         "OnART1_defaulter_tracer",
+         "HIV_SelfTest"
       ],
       "Custom_Node_Events": [],
       "Custom_Reports_Filename": "",
@@ -508,18 +511,15 @@
       "Report_HIV_ByAgeAndGender_Collect_HIV_Data": 1,
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
       "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
-         "Risk",
-         "ARTStatus",
          "OnPrEP"
       ],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,
       "Report_HIV_ByAgeAndGender_Event_Counter_List": [
-         "Program_VMMC",
-         "GaveBirth",
          "Initiate_Background_PrEP",
-         "PrEP_Choice_AGYW",
-         "PrEP_Choice_FSW"
+         "Initiate_Intervention_PrEP",
+         "OnART1_defaulter_tracer",
+         "HIV_SelfTest"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 2018,
