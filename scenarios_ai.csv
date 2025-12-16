@@ -1,7 +1,6 @@
-            "Start_Year__KP_VLS_Baseline": "<-- MARKER",
-Scenario,Campaign,Choice_Probabilities__KP_ART_Retention,Start_Year__KP_PrEP_VOICE4_Start,Start_Year__KP_SelfTesting_Start,Start_Year__KP_VLS_Baseline,Start_Year__KP_VLS_Improvement,Choice_Probabilities__KP_VLS_Improvement
-dalys_baseline,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2200,2026,2200,"[0.99,0.01]"
-dalys_retention,campaign_Malawi_20251209_AI_interventions.json,"[0,1]",2200,2200,2026,2200,"[0.99,0.01]"
-dalys_prep,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2026,2200,2026,2200,"[0.99,0.01]"
-dalys_selftesting,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2026,2026,2200,"[0.99,0.01]"
-dalys_linkage,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2026,2200,2026,"[0.99,0.01]"
+Scenario,Campaign,Choice_Probabilities__KP_ART_Retention,Start_Year__KP_PrEP_VOICE4_Start,Start_Year__KP_SelfTesting_Start,Choice_Probabilities__KP_Linkage_Services
+dalys_baseline,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2200,"[1.0,0.0]"
+dalys_retention,campaign_Malawi_20251209_AI_interventions.json,"[0,1]",2200,2200,"[1.0,0.0]"
+dalys_prep,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2026,2200,"[1.0,0.0]"
+dalys_selftesting,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2026,"[1.0,0.0]"
+dalys_linkage,campaign_Malawi_20251209_AI_interventions.json,"[1,0]",2200,2200,"[0.0,1.0]"

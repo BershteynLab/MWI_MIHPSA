@@ -3021,7 +3021,7 @@
             }
         },
         {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males under 35, before 2026",
+            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males under 35",
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
@@ -3033,47 +3033,7 @@
                     "Actual_IndividualIntervention_Config": {
                         "Choice_Names": [
                             "EffectiveART",
-                            "NonSuppressiveART"
-                        ],
-                        "Choice_Probabilities": [
-                            0.63,
-                            0.37
-                        ],
-                        "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
-                            "InterventionStatus:LostForever"
-                        ],
-                        "class": "HIVRandomChoice"
-                    },
-                    "Target_Demographic": "ExplicitAgeRangesAndGender",
-                    "Target_Gender":"Male",
-                    "Target_Age_Max": 35,
-                    "Target_Age_Min": 0,
-                    "Trigger_Condition_List": [
-                        "OnART1"
-                    ],
-                    "Duration": 13171,
-                    "class": "NodeLevelHealthTriggeredIV"
-                },
-                "class": "StandardInterventionDistributionEventCoordinator"
-            }
-        },
-        {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males under 35, after 2026",
-            "Nodeset_Config": {
-                "class": "NodeSetAll"
-            },
-            "Start_Year": 2026,
-            "Start_Year__KP_VLS_Baseline": "<-- MARKER",
-            "class": "CampaignEventByYear",
-            "Event_Coordinator_Config": {
-                "Demographic_Coverage": 1,
-                "Intervention_Config": {
-                    "Actual_IndividualIntervention_Config": {
-                        "Choice_Names": [
-                            "EffectiveART",
-                            "NonSuppressiveART"
+                            "NonSuppressiveART_staging"
                         ],
                         "Choice_Probabilities": [
                             0.63,
@@ -3099,7 +3059,7 @@
             }
         },
         {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males over 35, before 2026",
+            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males over 35",
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
@@ -3111,47 +3071,7 @@
                     "Actual_IndividualIntervention_Config": {
                         "Choice_Names": [
                             "EffectiveART",
-                            "NonSuppressiveART"
-                        ],
-                        "Choice_Probabilities": [
-                            0.849,
-                            0.151
-                        ],
-                        "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
-                            "InterventionStatus:LostForever"
-                        ],
-                        "class": "HIVRandomChoice"
-                    },
-                    "Target_Demographic": "ExplicitAgeRangesAndGender",
-                    "Target_Gender":"Male",
-                    "Target_Age_Max": 99,
-                    "Target_Age_Min": 35,
-                    "Trigger_Condition_List": [
-                        "OnART1"
-                    ],
-                    "Duration": 13171,
-                    "class": "NodeLevelHealthTriggeredIV"
-                },
-                "class": "StandardInterventionDistributionEventCoordinator"
-            }
-        },
-        {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Males over 35, after 2026",
-            "Nodeset_Config": {
-                "class": "NodeSetAll"
-            },
-            "Start_Year": 2026,
-            "Start_Year__KP_VLS_Baseline": "<-- MARKER",
-            "class": "CampaignEventByYear",
-            "Event_Coordinator_Config": {
-                "Demographic_Coverage": 1,
-                "Intervention_Config": {
-                    "Actual_IndividualIntervention_Config": {
-                        "Choice_Names": [
-                            "EffectiveART",
-                            "NonSuppressiveART"
+                            "NonSuppressiveART_staging"
                         ],
                         "Choice_Probabilities": [
                             0.849,
@@ -3177,7 +3097,7 @@
             }
         },
         {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females under 35, before 2026",
+            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females under 35",
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
@@ -3189,47 +3109,7 @@
                     "Actual_IndividualIntervention_Config": {
                         "Choice_Names": [
                             "EffectiveART",
-                            "NonSuppressiveART"
-                        ],
-                        "Choice_Probabilities": [
-                            0.746,
-                            0.254
-                        ],
-                        "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
-                            "InterventionStatus:LostForever"
-                        ],
-                        "class": "HIVRandomChoice"
-                    },
-                    "Target_Demographic": "ExplicitAgeRangesAndGender",
-                    "Target_Gender":"Female",
-                    "Target_Age_Max": 35,
-                    "Target_Age_Min": 0,
-                    "Trigger_Condition_List": [
-                        "OnART1"
-                    ],
-                    "Duration": 13171,
-                    "class": "NodeLevelHealthTriggeredIV"
-                },
-                "class": "StandardInterventionDistributionEventCoordinator"
-            }
-        },
-                {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females under 35, after 2026",
-            "Nodeset_Config": {
-                "class": "NodeSetAll"
-            },
-            "Start_Year": 2026,
-            "Start_Year__KP_VLS_Baseline": "<-- MARKER",
-            "class": "CampaignEventByYear",
-            "Event_Coordinator_Config": {
-                "Demographic_Coverage": 1,
-                "Intervention_Config": {
-                    "Actual_IndividualIntervention_Config": {
-                        "Choice_Names": [
-                            "EffectiveART",
-                            "NonSuppressiveART"
+                            "NonSuppressiveART_staging"
                         ],
                         "Choice_Probabilities": [
                             0.746,
@@ -3255,7 +3135,7 @@
             }
         },
         {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females over 35, before 2026",
+            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females over 35",
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
@@ -3267,47 +3147,7 @@
                     "Actual_IndividualIntervention_Config": {
                         "Choice_Names": [
                             "EffectiveART",
-                            "NonSuppressiveART"
-                        ],
-                        "Choice_Probabilities": [
-                            0.891,
-                            0.109
-                        ],
-                        "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
-                            "InterventionStatus:LostForever"
-                        ],
-                        "class": "HIVRandomChoice"
-                    },
-                    "Target_Demographic": "ExplicitAgeRangesAndGender",
-                    "Target_Gender":"Female",
-                    "Target_Age_Max": 99,
-                    "Target_Age_Min": 35,
-                    "Trigger_Condition_List": [
-                        "OnART1"
-                    ],
-                    "Duration": 13171,
-                    "class": "NodeLevelHealthTriggeredIV"
-                },
-                "class": "StandardInterventionDistributionEventCoordinator"
-            }
-        },
-        {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy, Females over 35, after 2026",
-            "Nodeset_Config": {
-                "class": "NodeSetAll"
-            },
-            "Start_Year": 2026,
-            "Start_Year__KP_VLS_Baseline": "<-- MARKER",
-            "class": "CampaignEventByYear",
-            "Event_Coordinator_Config": {
-                "Demographic_Coverage": 1,
-                "Intervention_Config": {
-                    "Actual_IndividualIntervention_Config": {
-                        "Choice_Names": [
-                            "EffectiveART",
-                            "NonSuppressiveART"
+                            "NonSuppressiveART_staging"
                         ],
                         "Choice_Probabilities": [
                             0.891,
@@ -3333,27 +3173,22 @@
             }
         },
         {
-            "Event_Name": "Random draw to initiate effective ART or non-suppressive therapy with VLS improvement",
-            "COMMENT": "Improved linkage to services: VLS improvement intervention for all demographic groups",
+            "Event_Name": "Random draw to pass someone to NonSuppressiveART, prior to 2026",
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
-            "Start_Year": 2200,
-            "Start_Year__KP_VLS_Improvement": "<-- MARKER",
+            "Start_Year": 1990,
             "class": "CampaignEventByYear",
             "Event_Coordinator_Config": {
                 "Demographic_Coverage": 1,
                 "Intervention_Config": {
                     "Actual_IndividualIntervention_Config": {
                         "Choice_Names": [
-                            "EffectiveART",
                             "NonSuppressiveART"
                         ],
                         "Choice_Probabilities": [
-                            0.99,
-                            0.01
+                            1.0
                         ],
-                        "Choice_Probabilities__KP_VLS_Improvement": "<-- MARKER",
                         "Disqualifying_Properties": [
                             "InterventionStatus:OnEffectiveART",
                             "InterventionStatus:OnNonSuppressiveART",
@@ -3365,7 +3200,46 @@
                     "Target_Age_Max": 99,
                     "Target_Age_Min": 15,
                     "Trigger_Condition_List": [
-                        "OnART1"
+                        "NonSuppressiveART_staging"
+                    ],
+                    "Duration": 13171,
+                    "class": "NodeLevelHealthTriggeredIV"
+                },
+                "class": "StandardInterventionDistributionEventCoordinator"
+            }
+        },
+        {
+            "Event_Name": "Random draw to pass someone to NonSuppressiveART, after 2026",
+            "Nodeset_Config": {
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 2026,
+            "class": "CampaignEventByYear",
+            "Event_Coordinator_Config": {
+                "Demographic_Coverage": 1,
+                "Intervention_Config": {
+                    "Actual_IndividualIntervention_Config": {
+                        "Choice_Names": [
+                            "NonSuppressiveART",
+                            "EffectiveART_Linkage_Services"
+                        ],
+                        "Choice_Probabilities": [
+                            1.0,
+                            0.0
+                        ],
+                        "Choice_Probabilities__KP_Linkage_Services": "<-- MARKER",
+                        "Disqualifying_Properties": [
+                            "InterventionStatus:OnEffectiveART",
+                            "InterventionStatus:OnNonSuppressiveART",
+                            "InterventionStatus:LostForever"
+                        ],
+                        "class": "HIVRandomChoice"
+                    },
+                    "Target_Demographic": "ExplicitAgeRanges",
+                    "Target_Age_Max": 99,
+                    "Target_Age_Min": 15,
+                    "Trigger_Condition_List": [
+                        "NonSuppressiveART_staging"
                     ],
                     "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3390,7 +3264,8 @@
                     "class": "PropertyValueChanger"
                 },
                 "Trigger_Condition_List": [
-                    "EffectiveART"
+                    "EffectiveART",
+                    "EffectiveART_Linkage_Services"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3415,7 +3290,8 @@
                     "class": "PropertyValueChanger"
                 },
                 "Trigger_Condition_List": [
-                    "EffectiveART"
+                    "EffectiveART",
+                    "EffectiveART_Linkage_Services"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3482,7 +3358,10 @@
                 "Demographic_Coverage": 1,
                 "Intervention_Config": {
                     "class": "NodeLevelHealthTriggeredIV",
-                    "Trigger_Condition_List": [ "EffectiveART" ],
+                    "Trigger_Condition_List": [
+                        "EffectiveART",
+                        "EffectiveART_Linkage_Services"
+                    ],
                     "Target_Demographic": "ExplicitGender",
                     "Target_Gender": "Male",
                     "Actual_IndividualIntervention_Config": {
@@ -3541,7 +3420,10 @@
                 "Demographic_Coverage": 1,
                 "Intervention_Config": {
                     "class": "NodeLevelHealthTriggeredIV",
-                    "Trigger_Condition_List": [ "EffectiveART" ],
+                    "Trigger_Condition_List": [ 
+                        "EffectiveART",
+                        "EffectiveART_Linkage_Services"
+                    ],
                     "Target_Demographic": "ExplicitGender",
                     "Target_Gender": "Female",
                     "Actual_IndividualIntervention_Config": {
