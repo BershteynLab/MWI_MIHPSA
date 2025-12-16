@@ -1,0 +1,779 @@
+---
+title: "HIVMC_AI_Results"
+output: html_document
+date: "2025-12-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+
+```{r}
+suppressMessages(library(tidyverse))
+suppressMessages(library(data.table))
+suppressMessages(library(magrittr))
+library(ggplot2)
+library(devtools)
+library(rsample)
+
+CENSUS_YEAR = 2018.5
+MALAWI_CENSUS_POP = 17563749
+
+pop_scaling_factor = 97.23887 # Change reports to overlap with census year
+
+
+datestring <- format(Sys.Date(), "%Y%m%d")
+```
+
+```{r}
+# DALY calculation parameters
+discount_percent = 0.03
+discount_start_year = 2025
+infected_weight = 0.274
+art_weight = 0.078
+
+# Costing
+
+CET = 500
+ppyOnART = 210
+```
+
+## Define functions
+```{r}
+bt_mean <- function(splits, colname){
+  x <- as.data.frame(analysis(splits))
+  mean(x[[colname]])
+}
+
+calculate.CI.by.metric = function(data, scenario.name, metric, n = 500){
+  bt_resamples <- bootstraps(data %>% filter(scenario_name == scenario.name), times = n)
+  
+  bt_resamples$mean.metric <- map_dbl(bt_resamples$splits, bt_mean, metric)
+  metric_95 <- quantile(bt_resamples$mean.metric, probs = c(0.025, 0.975))
+  
+  return(
+      data.frame(
+      scenario_name = scenario.name, 
+      metric = metric,
+      metric.mean = mean(bt_resamples$mean.metric),
+      metric.lb = metric_95[[1]], 
+      metric.ub = metric_95[[2]]
+    )
+  )
+}
+
+format_sig3 <- function(x) {
+  vapply(x, function(val) {
+    if (is.na(val)) return(NA_character_)
+    if (abs(val) > 0 & abs(val) < 1) {
+      formatC(signif(val, 3), digits=3, format="fg", flag="#")
+    } else {
+      formatC(round(val), format="d")
+    }
+  }, character(1))
+}
+```
+
+
+# Secondary test - load preliminary results
+```{r}
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_baseline___2025_12_11_17_01_47_688905/"
+
+sim.results.base <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.baseline',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_prep___2025_12_11_17_03_59_457758/"
+
+sim.results.prep <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.prep',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_selftesting___2025_12_11_17_04_55_261840/"
+
+sim.results.self <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.self.test',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_retention___2025_12_11_17_03_00_937365/"
+
+sim.results.retention <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.retention',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed", 
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+sim.results <- rbind(sim.results.base, sim.results.prep, sim.results.retention, sim.results.self)
+
+sim.results.pop.scaling <- sim.results %>% 
+      filter(Year == CENSUS_YEAR) %>%
+      group_by(sim.id) %>%
+      summarize(total.pop = sum(Population), .groups = 'keep') %>% 
+      mutate(pop.scaling.factor = MALAWI_CENSUS_POP/total.pop)
+
+sim.results.pop.scaling$sim.id.ix <- 1:nrow(sim.results.pop.scaling)
+
+sim.results <- sim.results %>% 
+  inner_join(
+    sim.results.pop.scaling,
+    by = c("sim.id")
+  )
+
+```
+
+## Generate basic metrics tables
+```{r}
+time.series.metrics.disaggregated <- sim.results %>% 
+  mutate(Year = ceiling(Year) - 1) %>% 
+  filter(Year >= 2025.5, Year <= 2046, Age >= 25) %>% 
+  group_by(Year, sim.ix, scenario_name) %>% 
+  summarize(Population = sum(Population*pop_scaling_factor)/2,
+            PLHIV = sum(Infected * pop_scaling_factor)/2,
+            Diagnosed = sum(Diagnosed * pop_scaling_factor)/2,
+            On_ART = sum(On_ART * pop_scaling_factor)/2,
+            Newly.Infected = sum(Newly.Infected * pop_scaling_factor),
+            Died_from_HIV = sum(Died_from_HIV * pop_scaling_factor),
+            HIV_SelfTest = sum( HIV_SelfTest * pop_scaling_factor),
+            Initiate_Intervention_PrEP = sum(Initiate_Intervention_PrEP * pop_scaling_factor), 
+            OnART1_defaulter_tracer = sum(OnART1_defaulter_tracer * pop_scaling_factor), 
+            .groups = 'drop_last'
+  ) %>% 
+  ungroup() %>% 
+  mutate(Off_ART = PLHIV - On_ART) 
+
+time.series.metrics.disaggregated %>% write_csv("basic_metrics_A2599.csv")
+
+time.series.metrics.disaggregated <- time.series.metrics.disaggregated %>%
+  mutate(discount_factor = (1 - discount_percent)^(Year - discount_start_year) ) %>%
+  mutate(On_ART.discount = On_ART * discount_factor,
+         HIV_SelfTest.discount = HIV_SelfTest * discount_factor,
+         Initiate_Intervention_PrEP.discount = Initiate_Intervention_PrEP * discount_factor,
+         OnART1_defaulter_tracer.discount = OnART1_defaulter_tracer * discount_factor)
+
+data.metrics.aggregated.2025.2045 <- time.series.metrics.disaggregated %>% 
+  group_by(scenario_name, sim.ix) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected),
+            Died_from_HIV = sum(Died_from_HIV),
+            On_ART = sum(On_ART), 
+            On_ART.discount = sum(On_ART.discount),
+            Off_ART = sum(Off_ART),
+            HIV_SelfTest = sum(HIV_SelfTest),
+            HIV_SelfTest.discount = sum(HIV_SelfTest.discount),
+            Initiate_Intervention_PrEP = sum(Initiate_Intervention_PrEP),
+            Initiate_Intervention_PrEP.discount = sum(Initiate_Intervention_PrEP.discount),
+            OnART1_defaulter_tracer = sum(OnART1_defaulter_tracer),
+            OnART1_defaulter_tracer.discount = sum(OnART1_defaulter_tracer.discount),
+            .groups = 'drop_last'
+  ) %>% 
+  ungroup()
+
+data.metrics.aggregated.2025.2045 <- data.metrics.aggregated.2025.2045 %>% merge(
+  data.metrics.aggregated.2025.2045 %>% filter(scenario_name == 'daly.baseline') %>% 
+    select(sim.ix, 
+           Newly.Infected.baseline = Newly.Infected,
+           Died_from_HIV.baseline = Died_from_HIV,
+           On_ART.baseline = On_ART, 
+           On_ART.discount.baseline = On_ART.discount, 
+           Off_ART.baseline = Off_ART),
+  by = c("sim.ix")
+) %>% 
+  mutate(Newly.Infected.diff = Newly.Infected - Newly.Infected.baseline,
+         Died_from_HIV.diff = Died_from_HIV - Died_from_HIV.baseline,
+         On_ART.diff = On_ART - On_ART.baseline,
+         On_ART.discount.diff = On_ART.discount - On_ART.discount.baseline,
+         Off_ART.diff = Off_ART - Off_ART.baseline) %>% 
+  mutate(Newly.Infected.pct = Newly.Infected.diff/Newly.Infected.baseline,
+         Died_from_HIV.pct = Died_from_HIV.diff/Died_from_HIV.baseline,
+         On_ART.pct = On_ART.diff/On_ART, 
+         On_ART.discount.pct = On_ART.discount.diff/On_ART.discount, 
+         Off_ART.pct = Off_ART.diff/Off_ART)
+
+metric.names = c(
+  "Newly.Infected",
+  "Died_from_HIV",
+  "On_ART",
+  "On_ART.discount",
+  "Off_ART",
+  "Newly.Infected.diff",
+  "Died_from_HIV.diff",
+  "On_ART.diff",
+  "On_ART.discount.diff",
+  "Off_ART.diff",
+  "Newly.Infected.pct",
+  "Died_from_HIV.pct",
+  "On_ART.pct",
+  "On_ART.discount.pct",
+  "Off_ART.pct"
+)
+
+scenario.names = c("daly.baseline", "daly.prep", "daly.retention", "daly.self.test")
+
+metrics.data = data.frame()
+
+for (i in metric.names){
+  for (j in scenario.names) {
+    
+    #print(c(i,j))
+    h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = j,
+      metric = i)
+    
+    metrics.data = rbind(metrics.data, h)
+  }
+}
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.retention",
+      metric = "OnART1_defaulter_tracer")
+metrics.data = rbind(metrics.data, h)
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.retention",
+      metric = "OnART1_defaulter_tracer.discount")
+metrics.data = rbind(metrics.data, h)
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.prep",
+      metric = "Initiate_Intervention_PrEP")
+metrics.data = rbind(metrics.data, h)
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.prep",
+      metric = "Initiate_Intervention_PrEP.discount")
+metrics.data = rbind(metrics.data, h)
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.self.test",
+      metric = "HIV_SelfTest")
+metrics.data = rbind(metrics.data, h)
+
+h <- calculate.CI.by.metric(
+      data = data.metrics.aggregated.2025.2045,
+      scenario.name = "daly.self.test",
+      metric = "HIV_SelfTest.discount")
+metrics.data = rbind(metrics.data, h)
+
+metrics.data %>% 
+  pivot_wider(id_cols = metric, names_from = scenario_name, values_from = metric.mean)
+
+metrics.data %>%  write_csv("HIVMC_AI/basic_metrics_with_CIs.csv")
+```
+
+## Generate Dalys tables
+```{r}
+data_by_age_year <- sim.results %>%
+  filter(Year >= 2025.5) %>% 
+  dplyr::group_by(Year, Age, sim.ix, scenario_name) %>%
+  dplyr::summarise(
+    Died_from_HIV = sum(Died_from_HIV),
+     Infected = sum(Infected),
+     On_ART = sum(On_ART),
+     pop_scaling_factor = mean(pop_scaling_factor),
+     .groups = "drop_last"
+   )
+
+data_by_age_year$Year_Integer <- floor((data_by_age_year$Year-0.5))
+
+m2 <- data_by_age_year %>%
+        dplyr::group_by(Year_Integer, Age, sim.ix, scenario_name) %>%
+        dplyr::summarise(
+          Died_from_HIV = sum(Died_from_HIV),
+          Infected = mean(Infected),
+          On_ART = mean(On_ART),
+          pop_scaling_factor = mean(pop_scaling_factor),
+          .groups = "drop_last"
+         )
+
+m2 <- m2 %>%
+        mutate(On_ART_calib = On_ART*pop_scaling_factor,
+        Infected_calib = Infected*pop_scaling_factor,
+        Died_from_HIV_calib = Died_from_HIV*pop_scaling_factor,
+        Infected_off_ART_calib = (Infected - On_ART)*pop_scaling_factor)
+
+life_expectancy = 80
+m2$Age <- ifelse(m2$Age >life_expectancy, life_expectancy, m2$Age)
+
+m3 <- m2 %>%
+      dplyr::group_by(Year_Integer, Age, scenario_name, sim.ix) %>%
+      dplyr::select(Year_Integer, Age, scenario_name, sim.ix, 
+                    Died_from_HIV_calib, Infected_off_ART_calib, On_ART_calib) %>%
+      dplyr::summarise_all(list(median=median))
+
+disability.tibble <- m3 %>%
+  dplyr::group_by(Year_Integer, scenario_name, sim.ix) %>%
+  dplyr::summarize(
+    infected_untreated = sum(Infected_off_ART_calib_median),
+    on_art = sum(On_ART_calib_median)
+    ) %>%
+  dplyr::rename(year = Year_Integer)
+
+m4 <- m3 %>% mutate(year_applied = Year_Integer - (Age - (life_expectancy + 1)))
+
+daly.tibble <- merge(
+  tibble(scenario_name_ = scenario.names),
+  tibble(
+    year = seq(min(m4$Year_Integer), max(m4$Year_Integer))
+  ),
+  all = TRUE
+) %>% 
+  merge(  tibble(sim.ix = seq(1,250)), all=TRUE)
+
+daly_expanded <- tibble(
+    year = seq(min(m4$Year_Integer), max(m4$Year_Integer))
+  ) %>% 
+  crossing(
+    sim.ix = unique(m4$sim.ix),
+    scenario_name = unique(m4$scenario_name)
+  )
+
+yll <- daly_expanded %>%
+  left_join(m4, by = c("sim.ix", "scenario_name")) %>%
+  filter(Year_Integer <= year, year_applied > year) %>%
+  group_by(year, sim.ix, scenario_name) %>%
+  summarize(
+    yll = sum(Died_from_HIV_calib_median, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+daly = left_join(
+  yll, 
+  disability.tibble, 
+  by=c("year", "sim.ix", "scenario_name")
+  ) %>%
+ replace(is.na(.), 0)
+
+daly <- daly %>% mutate(daly = infected_untreated*infected_weight + on_art*art_weight + yll)
+daly <- daly %>% mutate(discount_factor = (1 - discount_percent)^(year - discount_start_year) )
+daly[daly$year < discount_start_year,'discount_factor'] <- 1.0
+daly <- daly %>% mutate(daly_future_discounted = daly*discount_factor )
+
+# Intermediate table!
+HIV.DALYs <- daly %>% select(
+  Year = year, 
+  scenario_name,
+  sim.ix,
+  HIV.DALY = daly,
+  HIV.DALY.discounted = daly_future_discounted)
+
+HIV.DALYs %>% write_csv("HIVMC_AI/INSPIRE_CE_DALY_calculation.csv")
+```
+
+### Generate confidence interval calculations
+Aggregate and calculate total DALYs averted
+```{r}
+HIV.DALYs <- read_csv("HIVMC_AI/INSPIRE_CE_DALY_calculation.csv")
+# Aggregate over years and calculate DALYs averted
+HIV.DALYs.agg <- HIV.DALYs %>% 
+  group_by(sim.ix, scenario_name) %>% 
+  summarize(HIV.DALY= sum(HIV.DALY),
+            HIV.DALY.discounted = sum(HIV.DALY.discounted), .groups = 'drop_last') %>% 
+  ungroup() 
+  
+HIV.DALYs.agg <- HIV.DALYs.agg %>% merge(
+    HIV.DALYs.agg %>% filter(scenario_name == 'daly.baseline') %>% 
+      select(sim.ix, 
+             HIV.DALY.baseline = HIV.DALY,
+             HIV.DALY.discounted.baseline = HIV.DALY.discounted),
+    by = c('sim.ix')
+  ) %>% 
+  mutate(
+    HIV.DALY.diff = HIV.DALY - HIV.DALY.baseline,
+    HIV.DALY.discounted.diff = HIV.DALY.discounted - HIV.DALY.discounted.baseline
+  ) %>% 
+  mutate(
+    HIV.DALY.pct = HIV.DALY.diff/HIV.DALY,
+    HIV.DALY.discounted.pct = HIV.DALY.discounted.diff/HIV.DALY.discounted
+  )
+
+metric.names = c("HIV.DALY", "HIV.DALY.discounted",
+                 "HIV.DALY.diff", "HIV.DALY.discounted.diff",
+                 "HIV.DALY.pct", "HIV.DALY.discounted.pct")
+
+scenario.names = c("daly.baseline", "daly.prep", "daly.retention", "daly.self.test")
+
+daly.cis = data.frame()
+
+for (i in metric.names){
+  for (j in scenario.names) {
+    
+    #print(c(i,j))
+    h <- calculate.CI.by.metric(
+      data = HIV.DALYs.agg,
+      scenario.name = j,
+      metric = i)
+    
+    daly.cis = rbind(daly.cis, h)
+  }
+}
+
+daly.cis
+
+daly.cis %>% write_csv("HIVMC_AI/DALY_calculation_CIs.csv")
+
+```
+
+# Generate some sanity check plots
+
+# Upper bound cost thresholds
+
+```{r}
+daly.cis <- read_csv("HIVMC_AI/DALY_calculation_CIs.csv")
+metrics.data <- read_csv("HIVMC_AI/basic_metrics_with_CIs.csv")
+```
+
+```{r}
+costs.data <- merge(
+  metrics.data %>% pivot_wider(
+    id_cols = "scenario_name",
+    names_from = "metric",
+    values_from = c("metric.mean", "metric.lb", "metric.ub"),
+    values_fill = 0
+  ) %>%
+    rename_with(~ sub("^metric\\.", "", .), starts_with("metric.")),
+  daly.cis %>%  pivot_wider(
+    id_cols = "scenario_name",
+    names_from = "metric",
+    values_from = c("metric.mean", "metric.lb", "metric.ub")
+  ) %>%
+    rename_with(~ sub("^metric\\.", "", .), starts_with("metric.")),
+  by = c("scenario_name")
+)
+
+cost.threshold.calculation <- costs.data %>% 
+  select(scenario_name, 
+         mean_On_ART.diff, mean_On_ART.discount.diff,
+         mean_HIV.DALY.diff, mean_HIV.DALY.discounted.diff,
+         mean_OnART1_defaulter_tracer, mean_OnART1_defaulter_tracer.discount,
+         mean_Initiate_Intervention_PrEP, mean_Initiate_Intervention_PrEP.discount,
+         mean_HIV_SelfTest, mean_HIV_SelfTest.discount) %>% 
+  mutate(
+    undiscounted.num = - CET * mean_HIV.DALY.diff - ppyOnART * mean_On_ART.diff,
+    discounted.num = - CET * mean_HIV.DALY.discounted.diff - ppyOnART * mean_On_ART.discount.diff
+  ) %>% 
+  mutate(
+    ART.cost = case_when(
+      mean_OnART1_defaulter_tracer == 0 ~ 0,
+      mean_OnART1_defaulter_tracer != 0 ~ undiscounted.num/mean_OnART1_defaulter_tracer),
+    ART.discount.cost = case_when(
+      mean_OnART1_defaulter_tracer.discount == 0 ~ 0,
+      mean_OnART1_defaulter_tracer.discount != 0 ~ discounted.num/mean_OnART1_defaulter_tracer.discount),
+    PREP.cost = case_when(
+      mean_Initiate_Intervention_PrEP == 0 ~ 0,
+      mean_Initiate_Intervention_PrEP != 0 ~ undiscounted.num/mean_Initiate_Intervention_PrEP),
+    PREP.discount.cost = case_when(
+      mean_Initiate_Intervention_PrEP.discount == 0 ~ 0,
+      mean_Initiate_Intervention_PrEP.discount != 0 ~ discounted.num/mean_Initiate_Intervention_PrEP.discount),
+    self.testing.cost = case_when(
+      mean_HIV_SelfTest == 0 ~ 0,
+      mean_HIV_SelfTest != 0 ~ undiscounted.num/mean_HIV_SelfTest),
+    self.testing.discount.cost = case_when(
+      mean_HIV_SelfTest.discount == 0 ~ 0,
+      mean_HIV_SelfTest.discount != 0 ~ discounted.num/mean_HIV_SelfTest.discount)
+  )
+  
+cost.threshold.calculation %>% 
+  select(scenario_name, 
+         ART.cost, ART.discount.cost,
+         PREP.cost, PREP.discount.cost,
+         self.testing.cost, self.testing.discount.cost)
+```
+
+# Calculate CIs on Upper Bound Cost Thresholds
+
+```{r}
+HIV.DALYs <- read_csv("HIVMC_AI/INSPIRE_CE_DALY_calculation.csv")
+# Aggregate over years and calculate DALYs averted
+HIV.DALYs.agg <- HIV.DALYs %>% 
+  group_by(sim.ix, scenario_name) %>% 
+  summarize(HIV.DALY= sum(HIV.DALY),
+            HIV.DALY.discounted = sum(HIV.DALY.discounted), .groups = 'drop_last') %>% 
+  ungroup() 
+  
+HIV.DALYs.agg <- HIV.DALYs.agg %>% merge(
+    HIV.DALYs.agg %>% filter(scenario_name == 'daly.baseline') %>% 
+      select(sim.ix, 
+             HIV.DALY.baseline = HIV.DALY,
+             HIV.DALY.discounted.baseline = HIV.DALY.discounted),
+    by = c('sim.ix')
+  ) %>% 
+  mutate(
+    HIV.DALY.diff = HIV.DALY - HIV.DALY.baseline,
+    HIV.DALY.discounted.diff = HIV.DALY.discounted - HIV.DALY.discounted.baseline
+  ) %>% 
+  mutate(
+    HIV.DALY.pct = HIV.DALY.diff/HIV.DALY,
+    HIV.DALY.discounted.pct = HIV.DALY.discounted.diff/HIV.DALY.discounted
+  )
+
+cost.threshold.calculation.CIs.staging <- merge(
+  HIV.DALYs.agg %>% 
+    select(sim.ix, scenario_name, HIV.DALY.diff, HIV.DALY.discounted.diff),
+  data.metrics.aggregated.2025.2045 %>% 
+    select(sim.ix, scenario_name, 
+           On_ART.diff, On_ART.discount.diff,
+           HIV_SelfTest, HIV_SelfTest.discount,
+           Initiate_Intervention_PrEP, Initiate_Intervention_PrEP.discount,
+           ART = OnART1_defaulter_tracer,
+           ART.discount = OnART1_defaulter_tracer.discount),
+    by = c("sim.ix", "scenario_name")
+  ) %>% merge(
+    data.metrics.aggregated.2025.2045 %>% 
+    select(scenario_name, sim.ix, 
+           ART.maintenance = On_ART,
+           ART.maintenance.discount = On_ART.discount),
+    by = c("sim.ix", "scenario_name")
+) %>% 
+  mutate(
+    undiscounted.num = - CET * HIV.DALY.diff - ppyOnART * On_ART.diff,
+    discounted.num = - CET * HIV.DALY.discounted.diff - ppyOnART * On_ART.discount.diff
+  ) %>% 
+  mutate(
+    ART.cost = case_when(
+      ART == 0 ~ 0,
+      ART != 0 ~ undiscounted.num/ART),
+    ART.discount.cost = case_when(
+      ART.discount == 0 ~ 0,
+      ART.discount != 0 ~ discounted.num/ART.discount),
+    ART.maintenance.cost = case_when(
+      ART == 0 ~ 0,
+      ART != 0 ~ undiscounted.num/ART.maintenance),
+    ART.maintenance.discount.cost = case_when(
+      ART == 0 ~ 0,
+      ART != 0 ~ undiscounted.num/ART.maintenance.discount),
+    PREP.cost = case_when(
+      Initiate_Intervention_PrEP == 0 ~ 0,
+      Initiate_Intervention_PrEP != 0 ~ undiscounted.num/Initiate_Intervention_PrEP),
+    PREP.discount.cost = case_when(
+      Initiate_Intervention_PrEP.discount == 0 ~ 0,
+      Initiate_Intervention_PrEP.discount != 0 ~ discounted.num/Initiate_Intervention_PrEP.discount),
+    Self.testing.cost = case_when(
+      HIV_SelfTest == 0 ~ 0,
+      HIV_SelfTest != 0 ~ undiscounted.num/HIV_SelfTest),
+    Self.testing.discount.cost = case_when(
+      HIV_SelfTest.discount == 0 ~ 0,
+      HIV_SelfTest.discount != 0 ~ discounted.num/HIV_SelfTest.discount)
+  ) %>% 
+  mutate(
+    ARTcosts_fraction = ppyOnART * On_ART.diff/undiscounted.num,
+    ARTcosts_fraction.discount = ppyOnART * On_ART.discount.diff/ discounted.num)
+
+#cost.threshold.calculation.CIs.staging
+
+cost.threshold.calculation.CIs <- data.frame()
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ART.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ART.discount.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ART.maintenance.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ART.maintenance.discount.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ARTcosts_fraction")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.retention",
+      metric = "ARTcosts_fraction.discount")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.prep",
+      metric = "PREP.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.prep",
+      metric = "PREP.discount.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.prep",
+      metric = "ARTcosts_fraction")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.prep",
+      metric = "ARTcosts_fraction.discount")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.self.test",
+      metric = "Self.testing.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.self.test",
+      metric = "Self.testing.discount.cost")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.self.test",
+      metric = "ARTcosts_fraction")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+h <- calculate.CI.by.metric(
+      data = cost.threshold.calculation.CIs.staging,
+      scenario.name = "daly.self.test",
+      metric = "ARTcosts_fraction.discount")
+cost.threshold.calculation.CIs = rbind(cost.threshold.calculation.CIs, h)
+
+cost.threshold.calculation.CIs %>% write_csv("HIVMC_AI/Cost_Threshold_Calculations_with_ART_maintenance.csv")
+
+cost.threshold.calculation.CIs
+```
+
+# Plots
+
+```{r}
+adults.plot.dat <- sim.results %>%
+  filter(Age >= 15) %>%
+  mutate(Off_ART = Infected - On_ART) %>% 
+  mutate(Year = floor(Year)) %>% 
+  group_by(scenario_name, Year, sim.ix) %>%
+  summarize(Died_from_HIV = sum(Died_from_HIV * pop_scaling_factor),
+            Newly.Infected = sum(Newly.Infected * pop_scaling_factor),
+            On_ART = sum(On_ART * pop_scaling_factor),
+            Off_ART = sum(Off_ART * pop_scaling_factor)) %>%
+  group_by(scenario_name, Year) %>%
+  summarize(Died_from_HIV = mean(Died_from_HIV),
+            Newly.Infected = mean(Newly.Infected),
+            On_ART = mean(On_ART),
+            Off_ART = mean(Off_ART)
+            )
+
+adults.plot.dat$scenario <- factor(adults.plot.dat$scenario_name, levels = c( "daly.baseline", "daly.prep", "daly.retention", "daly.self.test"))
+
+```
+
+## HIV Acquisitions
+
+```{r}
+hiv.acquisitions.adults <- adults.plot.dat %>% 
+  filter(Year >= 2020.5, Year < 2045) %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Newly.Infected, color = scenario_name ),
+            linewidth = 1,
+            show.legend = TRUE ) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2")) + 
+  scale_x_continuous("Year", breaks = seq(2020,2045,5)) +
+  scale_y_continuous("HIV Acquisitions") +
+  theme_minimal() + theme_bw() +
+  theme(panel.grid = element_blank(),
+        #axis.title.x = element_blank(),
+        #axis.text.x = element_blank(),
+        #plot.title = element_text(hjust = 0.5),
+        text = element_text(family = "sans"),
+        axis.text = element_text(size = 14),
+        axis.title= element_text(size = 16))
+
+hiv.acquisitions.adults
+
+ggsave(filename = paste0(c("HIVMC_AI/HIV_acquisitions_adults","_",datestring,".pdf"), 
+                         collapse = ''),  
+       plot = hiv.acquisitions.adults, 
+       width = 5, height = 4, units = 'in')
+```
+
+## HIV Deaths
+
+## Person-Years on ART
+```{r}
+hiv.onart.adults <- adults.plot.dat %>% 
+  filter(Year >= 2020.5, Year < 2045) %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name ),
+            linewidth = 1,
+            show.legend = FALSE ) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2")) + 
+  scale_x_continuous("Year", breaks = seq(2015,2040,5)) +
+  scale_y_continuous("Person-Years on ART") +
+  theme_minimal() + theme_bw() +
+  theme(panel.grid = element_blank(),
+        #axis.title.x = element_blank(),
+        #axis.text.x = element_blank(),
+        #plot.title = element_text(hjust = 0.5),
+        text = element_text(family = "sans"),
+        axis.text = element_text(size = 14),
+        axis.title= element_text(size = 16))
+
+hiv.onart.adults
+
+ggsave(filename = paste0(c("HIVMC_AI/HIV_onart_allages","_",datestring,".pdf"), 
+                         collapse = ''),
+       plot = hiv.onart.adults, 
+       width = 5, height = 4, units = 'in')
+```
+

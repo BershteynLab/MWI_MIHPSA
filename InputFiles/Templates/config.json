@@ -196,6 +196,7 @@
          "OnDrug",
          "EffectiveART",
          "NonSuppressiveART",
+         "OnART3_rundropout",
          "OnPreART0",
          "OnPreART1",
          "OnPreART10",
@@ -512,7 +513,7 @@
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
       "Report_HIV_ByAgeAndGender_Collect_IP_Data": [],
       ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [
-         "OnPrEP"
+         "ARTStatus"
       ],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,

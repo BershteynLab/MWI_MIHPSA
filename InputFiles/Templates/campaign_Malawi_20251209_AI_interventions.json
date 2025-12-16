@@ -3051,8 +3051,7 @@
                 "Target_Age_Max": 35,
                 "Target_Age_Min": 0,
                 "Trigger_Condition_List": [
-                    "OnART1",
-                    "OnART1_defaulter_tracer"
+                    "OnART1"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3090,8 +3089,7 @@
                 "Target_Age_Max": 99,
                 "Target_Age_Min": 35,
                 "Trigger_Condition_List": [
-                    "OnART1",
-                    "OnART1_defaulter_tracer"
+                    "OnART1"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3129,8 +3127,7 @@
                 "Target_Age_Max": 35,
                 "Target_Age_Min": 0,
                 "Trigger_Condition_List": [
-                    "OnART1",
-                    "OnART1_defaulter_tracer"
+                    "OnART1"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3168,8 +3165,7 @@
                 "Target_Age_Max": 99,
                 "Target_Age_Min": 35,
                 "Trigger_Condition_List": [
-                    "OnART1",
-                    "OnART1_defaulter_tracer"
+                    "OnART1"
                 ],
                 "class": "NodeLevelHealthTriggeredIV"
                 },
@@ -3522,7 +3518,10 @@
                 "Intervention_Config": {
                     "class": "NodeLevelHealthTriggeredIV",
                     "New_Property_Value":"",
-                    "Trigger_Condition_List": ["OnART1"],
+                    "Trigger_Condition_List": [
+                        "OnART1",
+                        "OnART1_defaulter_tracer"
+                    ],
                     "Actual_IndividualIntervention_Config": {
                         "Intervention_Name": "On_ART",
                         "class": "HIVMuxer",
@@ -3539,6 +3538,61 @@
             }
         },
         {
+            "Event_Name": "OnART: no defaulter tracing prior to 2026",
+            "class": "CampaignEventByYear",
+            "Nodeset_Config": { 
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 1990,
+            "Event_Coordinator_Config": {
+                "class": "StandardInterventionDistributionEventCoordinator",
+                "Demographic_Coverage": 1,
+                "Intervention_Config": {
+                    "Duration": 13140,
+                    "class": "NodeLevelHealthTriggeredIV",
+                    "Trigger_Condition_List": [ "OnART3" ],
+                    "Actual_IndividualIntervention_Config": {
+                        "Choice_Names": [
+                            "OnART3_rundropout"
+                        ],
+                        "Choice_Probabilities": [
+                            1
+                        ],
+                        "class": "HIVRandomChoice"
+                    }
+                }
+            }
+        },
+        {
+            "Event_Name": "OnART: defaulter tracing after 2026",
+            "class": "CampaignEventByYear",
+            "Nodeset_Config": { 
+                "class": "NodeSetAll"
+            },
+            "Start_Year": 2025.5,
+            "Event_Coordinator_Config": {
+                "class": "StandardInterventionDistributionEventCoordinator",
+                "Demographic_Coverage": 1,
+                "Intervention_Config": {
+                    "Duration": 13140,
+                    "class": "NodeLevelHealthTriggeredIV",
+                    "Trigger_Condition_List": [ "OnART3" ],
+                    "Actual_IndividualIntervention_Config": {
+                        "Choice_Names": [
+                            "OnART3_rundropout",
+                            "OnART1_defaulter_tracer"
+                        ],
+                        "Choice_Probabilities": [
+                            1,
+                            0
+                        ],
+                        "Choice_Probabilities__KP_ART_Retention": "<==marker",
+                        "class": "HIVRandomChoice"
+                    }
+                }
+            }
+        },
+        {
             "Event_Name": "OnART: state 3 (run ARTDropout)",
             "class": "CampaignEventByYear",
             "Nodeset_Config": { 
@@ -3550,7 +3604,7 @@
                 "Demographic_Coverage": 1,
                 "Intervention_Config": {
                     "class": "NodeLevelHealthTriggeredIV",
-                    "Trigger_Condition_List": [ "OnART3" ],
+                    "Trigger_Condition_List": [ "OnART3_rundropout" ],
                     "Actual_IndividualIntervention_Config": {
                         "class": "ARTDropout"
                     }
@@ -3567,7 +3621,7 @@
                     "Intervention_Config":{
                         "class":"NodeLevelHealthTriggeredIV",
                         "Trigger_Condition_List": [
-                            "OnART3"
+                            "OnART3_rundropout"
                         ],
                         "Actual_IndividualIntervention_Config": {
                             "class": "PropertyValueChanger",
@@ -3591,7 +3645,7 @@
                     "class": "NodeLevelHealthTriggeredIV",
                     "New_Property_Value":"",
                     "Trigger_Condition_List": [
-                        "OnART3"
+                        "OnART3_rundropout"
                     ],
                     "Actual_IndividualIntervention_Config": {
                         "class": "HIVRandomChoice",
@@ -4300,7 +4354,7 @@
             "Nodeset_Config": {
                 "class": "NodeSetAll"
             },
-            "Start_Year": 2025,
+            "Start_Year": 2200,
             "Start_Year__KP_ART_Retention_Start": "<-- Marker",
             "class": "CampaignEventByYear",
             "Event_Coordinator_Config": {
