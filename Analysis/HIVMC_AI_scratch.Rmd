@@ -264,10 +264,50 @@ sim.results.retention.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
 ) %>% 
   ungroup()
 
+# Linkage Baseline
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_linkage_baseline___2025_12_16_15_16_16_550905/"
+
+sim.results.baseline.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'baseline.test',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed", 
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest", "EffectiveART", "NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age", "IP_Key.ARTStatus"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
 sim.results <- rbind(
   #sim.results.retention, sim.results.self
   sim.results.baseline.test,
   sim.results.retention.test
+  )
+
+
+# Linkage Intervention
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_linkage_linkage___2025_12_16_15_16_39_513402/"
+
+sim.results.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'linkage.test',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed", 
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest", "EffectiveART", "NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age", "IP_Key.ARTStatus"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+sim.results <- rbind(
+  #sim.results.retention, sim.results.self
+  # sim.results.baseline.test,
+  # sim.results.retention.test
+  sim.results.baseline.linkage.test,
+  sim.results.linkage.test
   )
 
 sim.results$pop.scaling.factor <- pop_scaling_factor
@@ -768,5 +808,22 @@ metrics.A2599 %>%
   pivot_wider(id_cols = metric, names_from = scenario_name, values_from = metric.mean)
 
 metrics.A2599 %>%  write_csv("HIVMC_AI/AI_basic_metrics_with_CIs.csv")
+```
+
+# 
+
+```{r}
+sim.results.baseline %>% 
+  filter(Age >= 15) %>% 
+  group_by(sim.ix, Year, scenario_name) %>% 
+  summarize(
+    Died_from_HIV = sum(Died_from_HIV*pop.scaling.factor),
+    Newly.Infected = sum(Newly.Infected * pop.scaling.factor)) %>% 
+  group_by(Year, scenario_name) %>% 
+  summarize(
+    Died_from_HIV = mean(Died_from_HIV),
+    Newly.Infected = mean(Newly.Infected)
+  )
+  
 ```
 

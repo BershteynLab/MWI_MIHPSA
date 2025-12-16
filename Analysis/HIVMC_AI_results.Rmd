@@ -127,7 +127,7 @@ sim.results.self <- EMODAnalyzeR::read.simulation.results.bigpurple(
   ungroup()
 
 
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_retention___2025_12_11_17_03_00_937365/"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-dalys_retention___2025_12_15_19_09_30_127763/"
 
 sim.results.retention <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
@@ -180,7 +180,7 @@ time.series.metrics.disaggregated <- sim.results %>%
   ungroup() %>% 
   mutate(Off_ART = PLHIV - On_ART) 
 
-time.series.metrics.disaggregated %>% write_csv("basic_metrics_A2599.csv")
+time.series.metrics.disaggregated %>% write_csv("HIVMC_AI/basic_metrics.csv")
 
 time.series.metrics.disaggregated <- time.series.metrics.disaggregated %>%
   mutate(discount_factor = (1 - discount_percent)^(Year - discount_start_year) ) %>%
@@ -407,6 +407,7 @@ HIV.DALYs %>% write_csv("HIVMC_AI/INSPIRE_CE_DALY_calculation.csv")
 Aggregate and calculate total DALYs averted
 ```{r}
 HIV.DALYs <- read_csv("HIVMC_AI/INSPIRE_CE_DALY_calculation.csv")
+
 # Aggregate over years and calculate DALYs averted
 HIV.DALYs.agg <- HIV.DALYs %>% 
   group_by(sim.ix, scenario_name) %>% 
@@ -694,6 +695,12 @@ cost.threshold.calculation.CIs %>% write_csv("HIVMC_AI/Cost_Threshold_Calculatio
 
 cost.threshold.calculation.CIs
 ```
+# Tables
+
+```{r}
+
+```
+
 
 # Plots
 
@@ -722,11 +729,11 @@ adults.plot.dat$scenario <- factor(adults.plot.dat$scenario_name, levels = c( "d
 
 ```{r}
 hiv.acquisitions.adults <- adults.plot.dat %>% 
-  filter(Year >= 2020.5, Year < 2045) %>%
+  filter(Year >= 2024, Year < 2045) %>%
   ggplot() + 
   geom_line(mapping = aes(x = Year, y = Newly.Infected, color = scenario_name ),
             linewidth = 1,
-            show.legend = TRUE ) + 
+            show.legend = FALSE ) + 
   scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2")) + 
   scale_x_continuous("Year", breaks = seq(2020,2045,5)) +
   scale_y_continuous("HIV Acquisitions") +
@@ -739,9 +746,9 @@ hiv.acquisitions.adults <- adults.plot.dat %>%
         axis.text = element_text(size = 14),
         axis.title= element_text(size = 16))
 
-hiv.acquisitions.adults
+#hiv.acquisitions.adults
 
-ggsave(filename = paste0(c("HIVMC_AI/HIV_acquisitions_adults","_",datestring,".pdf"), 
+ggsave(filename = paste0(c("HIVMC_AI/HIV_acquisitions_allages","_",datestring,".pdf"), 
                          collapse = ''),  
        plot = hiv.acquisitions.adults, 
        width = 5, height = 4, units = 'in')
@@ -749,10 +756,38 @@ ggsave(filename = paste0(c("HIVMC_AI/HIV_acquisitions_adults","_",datestring,".p
 
 ## HIV Deaths
 
+```{r}
+hiv.deaths.adults <- adults.plot.dat %>% 
+  filter(Year >= 2024, Year < 2045) %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Died_from_HIV, color = scenario_name ),
+            linewidth = 1,
+            show.legend = FALSE ) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2")) + 
+  scale_x_continuous("Year", breaks = seq(2015,2040,5)) +
+  scale_y_continuous("HIV Deaths") +
+  theme_minimal() + theme_bw() +
+  theme(panel.grid = element_blank(),
+        #axis.title.x = element_blank(),
+        #axis.text.x = element_blank(),
+        #plot.title = element_text(hjust = 0.5),
+        text = element_text(family = "sans"),
+        axis.text = element_text(size = 14),
+        axis.title= element_text(size = 16))
+
+#hiv.deaths.adults
+
+ggsave(filename = paste0(c("HIVMC_AI/HIV_deaths_allages","_",datestring,".pdf"), 
+                         collapse = ''),  
+       plot = hiv.deaths.adults, 
+       width = 5, height = 4, units = 'in')
+```
+
+
 ## Person-Years on ART
 ```{r}
 hiv.onart.adults <- adults.plot.dat %>% 
-  filter(Year >= 2020.5, Year < 2045) %>%
+  filter(Year >= 2024, Year < 2045) %>%
   ggplot() + 
   geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name ),
             linewidth = 1,
@@ -769,11 +804,40 @@ hiv.onart.adults <- adults.plot.dat %>%
         axis.text = element_text(size = 14),
         axis.title= element_text(size = 16))
 
-hiv.onart.adults
+#hiv.onart.adults
 
 ggsave(filename = paste0(c("HIVMC_AI/HIV_onart_allages","_",datestring,".pdf"), 
                          collapse = ''),
        plot = hiv.onart.adults, 
+       width = 5, height = 4, units = 'in')
+```
+
+## Person-Years off ART
+
+```{r}
+hiv.offart.adults <- adults.plot.dat %>% 
+  filter(Year >= 2024, Year < 2045) %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Off_ART, color = scenario_name ),
+            linewidth = 1,
+            show.legend = FALSE ) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2")) + 
+  scale_x_continuous("Year", breaks = seq(2015,2040,5)) +
+  scale_y_continuous("Person-Years off ART") +
+  theme_minimal() + theme_bw() +
+  theme(panel.grid = element_blank(),
+        #axis.title.x = element_blank(),
+        #axis.text.x = element_blank(),
+        #plot.title = element_text(hjust = 0.5),
+        text = element_text(family = "sans"),
+        axis.text = element_text(size = 14),
+        axis.title= element_text(size = 16))
+
+#hiv.offart.adults
+
+ggsave(filename = paste0(c("HIVMC_AI/HIV_offart_allages","_",datestring,".pdf"), 
+                         collapse = ''),
+       plot = hiv.offart.adults, 
        width = 5, height = 4, units = 'in')
 ```
 

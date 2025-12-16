@@ -196,6 +196,8 @@
          "OnDrug",
          "EffectiveART",
          "NonSuppressiveART",
+         "EffectiveART_Linkage_Services",
+         "NonSuppressiveART_staging",
          "OnART3_rundropout",
          "OnPreART0",
          "OnPreART1",
@@ -521,7 +523,8 @@
          "Initiate_Background_PrEP",
          "Initiate_Intervention_PrEP",
          "OnART1_defaulter_tracer",
-         "HIV_SelfTest"
+         "HIV_SelfTest",
+         "EffectiveART_Linkage_Services"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 2018,
