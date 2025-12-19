@@ -513,8 +513,8 @@
       "Report_HIV_ByAgeAndGender_Collect_Gender_Data": 1,
       "Report_HIV_ByAgeAndGender_Collect_HIV_Data": 1,
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
-      "Report_HIV_ByAgeAndGender_Collect_IP_Data": [],
-      ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [
+      ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [],
+      "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
          "ARTStatus"
       ],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
@@ -524,7 +524,10 @@
          "Initiate_Intervention_PrEP",
          "OnART1_defaulter_tracer",
          "HIV_SelfTest",
-         "EffectiveART_Linkage_Services"
+         "EffectiveART_Linkage_Services",
+         "EffectiveART",
+         "NonSuppressiveART_staging",
+         "NonSuppressiveART"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 2018,

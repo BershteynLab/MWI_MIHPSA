@@ -17,6 +17,7 @@ suppressMessages(library(data.table))
 suppressMessages(library(magrittr))
 library(ggplot2)
 library(devtools)
+library(rsample)
 
 CENSUS_YEAR = 2018.5
 MALAWI_CENSUS_POP = 17563749
@@ -265,7 +266,7 @@ sim.results.retention.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
   ungroup()
 
 # Linkage Baseline
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_linkage_baseline___2025_12_16_15_16_16_550905/"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_baseline___2025_12_18_17_29_48_254550/"
 
 sim.results.baseline.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
@@ -273,21 +274,18 @@ sim.results.baseline.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpu
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
                         "Diagnosed", 
-                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest", "EffectiveART", "NonSuppressiveART"),
-  stratify_columns = c("Year", "Gender", "Age", "IP_Key.ARTStatus"),
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART", "NonSuppressiveART",
+                        "EffectiveART_Linkage_Services", "NonSuppressiveART_staging"),
+  stratify_columns = c("Year", "Gender", "Age"),
   min_age_inclusive = 0,
   max_age_inclusive = 99
 ) %>% 
   ungroup()
-sim.results <- rbind(
-  #sim.results.retention, sim.results.self
-  sim.results.baseline.test,
-  sim.results.retention.test
-  )
 
 
 # Linkage Intervention
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_linkage_linkage___2025_12_16_15_16_39_513402/"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_linkage___2025_12_18_17_30_09_594488/"
 
 sim.results.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
@@ -295,14 +293,16 @@ sim.results.linkage.test <- EMODAnalyzeR::read.simulation.results.bigpurple(
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
                         "Diagnosed", 
-                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest", "EffectiveART", "NonSuppressiveART"),
-  stratify_columns = c("Year", "Gender", "Age", "IP_Key.ARTStatus"),
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART", "NonSuppressiveART",
+                        "EffectiveART_Linkage_Services", "NonSuppressiveART_staging"),
+  stratify_columns = c("Year", "Gender", "Age"),
   min_age_inclusive = 0,
   max_age_inclusive = 99
 ) %>% 
   ungroup()
 
-sim.results <- rbind(
+sim.results.test <- rbind(
   #sim.results.retention, sim.results.self
   # sim.results.baseline.test,
   # sim.results.retention.test
@@ -310,20 +310,26 @@ sim.results <- rbind(
   sim.results.linkage.test
   )
 
-sim.results$pop.scaling.factor <- pop_scaling_factor
+sim.results.test$pop.scaling.factor <- pop_scaling_factor
 ```
 
 ## Count interventions
 
 ```{r}
-intven.dat <- sim.results %>% 
+intven.dat <- sim.results.test %>% 
+  filter(Year >= 15) %>% 
   mutate(Year = floor(Year - .5)) %>% 
   group_by(scenario_name, sim.ix, Year, Gender) %>% 
   summarize(
     Initiate_Background_PrEP = sum(Initiate_Background_PrEP * pop.scaling.factor), 
     Initiate_Intervention_PrEP = sum(Initiate_Intervention_PrEP * pop.scaling.factor),
     OnART1_defaulter_tracer = sum(OnART1_defaulter_tracer * pop.scaling.factor), 
-    HIV_SelfTest = sum(HIV_SelfTest * pop.scaling.factor), .groups = 'drop_last'
+    HIV_SelfTest = sum(HIV_SelfTest * pop.scaling.factor), 
+    EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor),
+    EffectiveART = sum(EffectiveART * pop.scaling.factor),
+    NonSuppressiveART = sum(NonSuppressiveART * pop.scaling.factor),
+    .groups = 'drop_last'
   ) %>% 
   group_by(scenario_name, Year, Gender) %>% 
   summarize(
@@ -331,19 +337,108 @@ intven.dat <- sim.results %>%
     Initiate_Intervention_PrEP = mean(Initiate_Intervention_PrEP), 
     OnART1_defaulter_tracer = mean(OnART1_defaulter_tracer), 
     HIV_SelfTest = mean(HIV_SelfTest),
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging),
+    EffectiveART = mean(EffectiveART), 
+    NonSuppressiveART = mean(NonSuppressiveART),
     .groups = 'drop_last'
   )
 
+#View(intven.dat %>% arrange(Year, scenario_name, Gender))
+
+```
+
+```{r}
 intven.dat %>% 
   pivot_longer(
-    cols = c(Initiate_Background_PrEP, Initiate_Intervention_PrEP, OnART1_defaulter_tracer, HIV_SelfTest),
+    cols = c(EffectiveART, NonSuppressiveART, EffectiveART_Linkage_Services, NonSuppressiveART_staging),
     names_to = "metric",
     values_to = "value"
   ) %>%
   ggplot() + 
   geom_line(mapping = aes(x = Year, y = value, color = scenario_name)) + 
-  facet_grid(cols = vars(Gender), rows = vars(metric))
+  facet_grid(cols = vars(metric), rows = vars(Gender))
 ```
+
+```{r}
+sim.results.test %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(scenario_name, sim.ix, Year, Gender) %>% 
+  summarize(On_ART = sum(On_ART * pop.scaling.factor)) %>% 
+  group_by(scenario_name, Year, Gender) %>% 
+  summarize(On_ART = mean(On_ART)) %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name)) + 
+  facet_grid(cols = vars(Gender))
+```
+
+
+```{r}
+intven.dat <- sim.results.test %>% 
+  filter(Age >= 35) %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(scenario_name, sim.ix, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor),
+    EffectiveART = sum(EffectiveART * pop.scaling.factor),
+    NonSuppressiveART = sum(NonSuppressiveART * pop.scaling.factor),
+    .groups = 'drop_last'
+  ) %>% 
+  group_by(scenario_name, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging),
+    EffectiveART = mean(EffectiveART), 
+    NonSuppressiveART = mean(NonSuppressiveART),
+    .groups = 'drop_last'
+  ) %>% 
+  mutate(Total = EffectiveART + NonSuppressiveART) %>% 
+  mutate(VLS = EffectiveART/Total)
+
+intven.dat %>% arrange(Year, Gender)
+```
+
+
+```{r}
+
+intven.dat <- sim.results.test %>% 
+  filter(Age >= 15, Age < 35) %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(scenario_name, sim.ix, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor),
+    EffectiveART = sum(EffectiveART * pop.scaling.factor),
+    NonSuppressiveART = sum(NonSuppressiveART * pop.scaling.factor),
+    .groups = 'drop_last'
+  ) %>% 
+  group_by(scenario_name, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging),
+    EffectiveART = mean(EffectiveART), 
+    NonSuppressiveART = mean(NonSuppressiveART),
+    .groups = 'drop_last'
+  ) %>% 
+  mutate(Total = EffectiveART + NonSuppressiveART) %>% 
+  mutate(VLS = EffectiveART/Total)
+
+intven.dat %>% arrange(Year, Gender)
+
+intven.dat %>% 
+  pivot_longer(
+    cols = c(EffectiveART, NonSuppressiveART, EffectiveART_Linkage_Services, NonSuppressiveART_staging),
+    names_to = "metric",
+    values_to = "value"
+  ) %>% 
+  filter(Year == 2020) %>% 
+  pivot_wider(id_cols = c(scenario_name, Year, Gender),
+              names_from = metric,
+              values_from = value)
+```
+
+
 
 ```{r}
 sim.results %>% 
@@ -478,7 +573,7 @@ prep.cov.dat %>%
 ## Look at numbers of acquisitions over time
 
 ```{r}
-sim.results %>% 
+sim.results.test %>% 
   filter(Age >= 15 ) %>% 
   group_by(sim.ix, Year, scenario_name) %>% 
   summarize(
@@ -489,14 +584,32 @@ sim.results %>%
   summarize(
     Newly.Infected = mean(Newly.Infected),
     Died_from_HIV = mean(Died_from_HIV)
-  )
+  ) %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Newly.Infected, color = scenario_name))
+
+
+sim.results.test %>% 
+  filter(Age >= 15 ) %>% 
+  group_by(sim.ix, Year, scenario_name) %>% 
+  summarize(
+   Newly.Infected = sum(Newly.Infected),
+   Died_from_HIV = sum(Died_from_HIV)
+  ) %>%
+  group_by(Year, scenario_name) %>% 
+  summarize(
+    Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV)
+  ) %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Died_from_HIV, color = scenario_name))
 ```
 
 
 ## Look at numbers on art over time
 
 ```{r}
-sim.results %>% 
+sim.results.test %>% 
   filter(Age >= 15 ) %>% 
   group_by(sim.ix, Year, scenario_name) %>% 
   summarize(
@@ -509,7 +622,9 @@ sim.results %>%
     On_ART = mean(On_ART),
     Infected = mean(Infected),
     OnART1_defaulter_tracer = mean(OnART1_defaulter_tracer)
-  )
+  ) %>% 
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name))
 ```
 ## Look at how many people are in each ARTStatus category over time
 
@@ -528,6 +643,54 @@ sim.results %>%
     id_cols = c(Year, scenario_name),
     names_from = IP_Key.ARTStatus,
     values_from = Infected
+  )
+```
+
+## Count interventions
+
+How many people are receiving the intervention - in excess of baseline effectiveART
+
+There's actually versions of this where we implement improved VLS and actually see decrease in the numbers of EffectiveART uptake
+
+```{r}
+sim.results %>% 
+  filter(Age >= 15 ) %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(sim.ix, Year, scenario_name, Gender) %>% 
+  summarize(
+   EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services * pop.scaling.factor),
+   NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor)
+  ) %>%
+  group_by(Year, scenario_name, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging)
+  ) %>% 
+  pivot_wider(
+    id_cols = c(Year, Gender),
+    names_from = scenario_name,
+    values_from = c(EffectiveART_Linkage_Services, NonSuppressiveART_staging)
+  )
+
+sim.results %>% 
+  filter(Age >= 15 ) %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  group_by(scenario_name, sim.ix, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor),
+    .groups = 'drop_last'
+  ) %>% 
+  group_by(scenario_name, Year, Gender) %>% 
+  summarize(
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging),
+    .groups = 'drop_last'
+  ) %>% 
+  pivot_wider(
+    id_cols = c(Year, Gender),
+    names_from = scenario_name,
+    values_from = c(EffectiveART_Linkage_Services, NonSuppressiveART_staging)
   )
 ```
 
@@ -825,5 +988,90 @@ sim.results.baseline %>%
     Newly.Infected = mean(Newly.Infected)
   )
   
+```
+
+```{r}
+
+dat <- rbind(
+  sim.results.linkage,
+  sim.results.base %>% select(names(sim.results.linkage))
+)
+
+ dat %>% 
+  filter(Age >= 15) %>%
+  mutate(Off_ART = Infected - On_ART) %>% 
+  mutate(Year = floor(Year)) %>% 
+  group_by(scenario_name, Year, sim.ix) %>%
+  summarize(Infected = sum(Infected/2), 
+            Died_from_HIV = sum(Died_from_HIV ),
+            Newly.Infected = sum(Newly.Infected),
+            On_ART = sum(On_ART ),
+            Off_ART = sum(Off_ART ),
+            EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services)) %>%
+  group_by(scenario_name, Year) %>%
+  summarize(
+    Infected = mean(Infected),
+    Died_from_HIV = mean(Died_from_HIV),
+    Newly.Infected = mean(Newly.Infected),
+    On_ART = mean(On_ART),
+    Off_ART = mean(Off_ART), 
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services)
+  ) %>% 
+  ggplot() + 
+   geom_line(mapping = aes(x = Year, y = EffectiveART_Linkage_Services, color = scenario_name))
+```
+
+```{r}
+ dat %>% 
+  filter(Age >= 15, Age < 35) %>%
+  mutate(Off_ART = Infected - On_ART) %>% 
+  mutate(Year = floor(Year)) %>% 
+  group_by(scenario_name, Gender, Year, sim.ix) %>%
+  summarize(Infected = sum(Infected/2), 
+            Died_from_HIV = sum(Died_from_HIV ),
+            Newly.Infected = sum(Newly.Infected),
+            On_ART = sum(On_ART ),
+            Off_ART = sum(Off_ART ),
+            EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services)) %>%
+  group_by(scenario_name, Gender, Year) %>%
+  summarize(
+    Infected = mean(Infected),
+    Died_from_HIV = mean(Died_from_HIV),
+    Newly.Infected = mean(Newly.Infected),
+    On_ART = mean(On_ART),
+    Off_ART = mean(Off_ART), 
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services)
+  ) %>% 
+  ggplot() + 
+   geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name)) + 
+  facet_grid(cols = vars(Gender))
+```
+```{r}
+ dat %>% 
+  filter(Age >= 35) %>%
+  mutate(Off_ART = Infected - On_ART) %>% 
+  mutate(Year = floor(Year)) %>% 
+  group_by(scenario_name, Gender, Year, sim.ix) %>%
+  summarize(Infected = sum(Infected/2), 
+            Died_from_HIV = sum(Died_from_HIV ),
+            Newly.Infected = sum(Newly.Infected),
+            On_ART = sum(On_ART ),
+            Off_ART = sum(Off_ART ),
+            EffectiveART_Linkage_Services = sum(EffectiveART_Linkage_Services)) %>%
+  group_by(scenario_name, Gender, Year) %>%
+  summarize(
+    Infected = mean(Infected),
+    Died_from_HIV = mean(Died_from_HIV),
+    Newly.Infected = mean(Newly.Infected),
+    On_ART = mean(On_ART),
+    Off_ART = mean(Off_ART), 
+    EffectiveART_Linkage_Services = mean(EffectiveART_Linkage_Services)
+  ) %>% filter(Year %in% c(2020, 2030)) %>% arrange(Year, Gender)
+
+
+%>% 
+  ggplot() + 
+   geom_line(mapping = aes(x = Year, y = On_ART, color = scenario_name)) + 
+  facet_grid(cols = vars(Gender))
 ```
 
