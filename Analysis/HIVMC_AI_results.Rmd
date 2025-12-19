@@ -75,6 +75,132 @@ format_sig3 <- function(x) {
 }
 ```
 
+# Load data, v2
+```{r}
+# input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_baseline-v2_baseline_clean___2025_12_19_12_05_38_657002"
+# 
+# sim.results.base.clean <- EMODAnalyzeR::read.simulation.results.bigpurple(
+#   experiment_path = input_path,
+#   scenario_name = 'daly.baseline.clean',
+#   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+#                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
+#                         "Diagnosed",
+#                         "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+#                         "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+#   stratify_columns = c("Year", "Gender", "Age"),
+#   min_age_inclusive = 0,
+#   max_age_inclusive = 99
+# ) %>% 
+#   mutate(EffectiveART_Linkage_Services = 0)
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v2_dalys_baseline___2025_12_18_22_57_28_396098/"
+
+sim.results.base.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.baseline.v2',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  mutate(EffectiveART_Linkage_Services = 0)
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v2_dalys_prep___2025_12_18_23_00_34_164126/"
+
+sim.results.prep.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.prep.v2',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  mutate(EffectiveART_Linkage_Services = 0)
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v2_dalys_selftesting___2025_12_18_23_01_35_045701/"
+
+sim.results.self.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.self.test.v2',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  mutate(EffectiveART_Linkage_Services = 0)
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v2_dalys_retention___2025_12_18_22_59_37_179936/"
+
+sim.results.retention.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.retention.v2',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup() %>% 
+  mutate(EffectiveART_Linkage_Services = 0)
+
+
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v2_dalys_linkage___2025_12_18_22_58_37_821865/"
+
+sim.results.linkage.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+  experiment_path = input_path,
+  scenario_name = 'daly.linkage.v2',
+  summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
+                        "Population","Infected", "On_ART","Died", "Died_from_HIV",
+                        "Diagnosed",
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
+  stratify_columns = c("Year", "Gender", "Age"),
+  min_age_inclusive = 0,
+  max_age_inclusive = 99
+) %>% 
+  ungroup()
+
+sim.results.v2 <- rbind(
+  #sim.results.base.clean,
+  sim.results.base.v2,
+  sim.results.prep.v2,
+  sim.results.self.v2,
+  sim.results.retention.v2,
+  sim.results.linkage.v2
+)
+
+sim.results.pop.scaling <- sim.results.v2 %>% 
+      filter(Year == CENSUS_YEAR) %>%
+      group_by(sim.id) %>%
+      summarize(total.pop = sum(Population), .groups = 'keep') %>% 
+      mutate(pop.scaling.factor = MALAWI_CENSUS_POP/total.pop)
+
+sim.results.v2 <- sim.results.v2 %>% 
+  inner_join(
+    sim.results.pop.scaling,
+    by = c("sim.id")
+  )
+
+```
+
 
 # Load data
 ```{r}
@@ -86,7 +212,8 @@ sim.results.base <- EMODAnalyzeR::read.simulation.results.bigpurple(
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
                         "Diagnosed",
-                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest"),
+                        "Initiate_Background_PrEP", "Initiate_Intervention_PrEP", "OnART1_defaulter_tracer", "HIV_SelfTest",
+                        "EffectiveART_Linkage_Services","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART"),
   stratify_columns = c("Year", "Gender", "Age"),
   min_age_inclusive = 0,
   max_age_inclusive = 99
@@ -805,7 +932,7 @@ read_csv("HIVMC_AI/Cost_Threshold_Calculations_with_ART_maintenance.csv")
 # Plots
 
 ```{r}
-adults.plot.dat <- sim.results.combination %>%
+adults.plot.dat <- sim.results.v2 %>%
   filter(Age >= 15) %>%
   mutate(Off_ART = Infected - On_ART) %>% 
   mutate(Year = floor(Year)) %>% 
@@ -837,7 +964,7 @@ plhiv.adults <- adults.plot.dat %>%
   geom_line(mapping = aes(x = Year, y = Infected, color = scenario_name ),
             linewidth = 1,
             show.legend = TRUE ) + 
-  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2", "darkgreen")) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2", "darkgreen", "purple")) + 
   scale_x_continuous("Year", breaks = seq(2020,2045,5)) +
   scale_y_continuous("People Living With HIV") +
   theme_minimal() + theme_bw() +
@@ -862,7 +989,7 @@ hiv.acquisitions.adults <- adults.plot.dat %>%
   geom_line(mapping = aes(x = Year, y = Newly.Infected, color = scenario_name ),
             linewidth = 1,
             show.legend = TRUE ) + 
-  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2", "darkgreen")) + 
+  scale_color_manual(values = c( "black","#C41000", "#E69F00", "#0072B2", "darkgreen", "purple")) + 
   scale_x_continuous("Year", breaks = seq(2020,2045,5)) +
   scale_y_continuous("HIV Acquisitions") +
   theme_minimal() + theme_bw() +

@@ -3196,9 +3196,6 @@
                         ],
                         "class": "HIVRandomChoice"
                     },
-                    "Target_Demographic": "ExplicitAgeRanges",
-                    "Target_Age_Max": 99,
-                    "Target_Age_Min": 15,
                     "Trigger_Condition_List": [
                         "NonSuppressiveART_staging"
                     ],
