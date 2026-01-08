@@ -1075,3 +1075,8 @@ dat <- rbind(
   facet_grid(cols = vars(Gender))
 ```
 
+```{r}
+HIV.DALYs.agg %>% group_by(scenario_name) %>% 
+  summarize(HIV.DALY = mean(HIV.DALY))
+```
+
