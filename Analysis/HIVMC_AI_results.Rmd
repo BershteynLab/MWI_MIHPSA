@@ -1012,8 +1012,6 @@ read_csv("HIVMC_AI/combination_DALY_calculation_CIs.csv")  %>%
    filter(scenario_name %in% scenario.names[1:5])
 ```
 
-
-
 ```{r}
 read_csv("HIVMC_AI/Cost_Threshold_Calculations_with_ART_maintenance.csv")
 ```
@@ -1030,18 +1028,20 @@ dat.males.15 <- sim.results.combination.v2 %>%
     Population = sum(Population * pop.scaling.factor/2),
     PLHIV = sum(Infected * pop.scaling.factor/2),
     Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
-    On_ART = sum(On_ART * pop.scaling.factor)
+    Died_from_HIV = sum(Newly.Infected * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor/2)
   ) %>% 
   group_by(Year, scenario_name) %>% 
   summarize(
     Population = mean(Population), 
     PLHIV = mean(PLHIV),
     Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV),
     On_ART = mean(On_ART)
   ) %>% 
   ungroup() %>% 
   pivot_longer(
-    cols = c(Population, PLHIV, Newly.Infected, On_ART),
+    cols = c(Population, PLHIV, Newly.Infected, Died_from_HIV, On_ART),
     names_to = "indicator"
   ) %>% 
   pivot_wider(
@@ -1057,22 +1057,24 @@ dat.males.15.49 <- sim.results.combination.v2 %>%
   mutate(Year = floor(Year - .5)) %>% 
   filter(Gender ==0, Age >=15, Age < 50) %>% 
   group_by(Year, scenario_name, sim.ix) %>% 
-  summarize(
+    summarize(
     Population = sum(Population * pop.scaling.factor/2),
     PLHIV = sum(Infected * pop.scaling.factor/2),
     Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
-    On_ART = sum(On_ART * pop.scaling.factor)
+    Died_from_HIV = sum(Newly.Infected * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor/2)
   ) %>% 
   group_by(Year, scenario_name) %>% 
   summarize(
     Population = mean(Population), 
     PLHIV = mean(PLHIV),
     Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV),
     On_ART = mean(On_ART)
   ) %>% 
   ungroup() %>% 
   pivot_longer(
-    cols = c(Population, PLHIV, Newly.Infected, On_ART),
+    cols = c(Population, PLHIV, Newly.Infected, Died_from_HIV, On_ART),
     names_to = "indicator"
   ) %>% 
   pivot_wider(
@@ -1088,22 +1090,24 @@ dat.females.15 <- sim.results.combination.v2 %>%
   mutate(Year = floor(Year - .5)) %>% 
   filter(Gender ==1, Age >=15) %>% 
   group_by(Year, scenario_name, sim.ix) %>% 
-  summarize(
+    summarize(
     Population = sum(Population * pop.scaling.factor/2),
     PLHIV = sum(Infected * pop.scaling.factor/2),
     Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
-    On_ART = sum(On_ART * pop.scaling.factor)
+    Died_from_HIV = sum(Newly.Infected * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor/2)
   ) %>% 
   group_by(Year, scenario_name) %>% 
   summarize(
     Population = mean(Population), 
     PLHIV = mean(PLHIV),
     Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV),
     On_ART = mean(On_ART)
   ) %>% 
   ungroup() %>% 
   pivot_longer(
-    cols = c(Population, PLHIV, Newly.Infected, On_ART),
+    cols = c(Population, PLHIV, Newly.Infected, Died_from_HIV, On_ART),
     names_to = "indicator"
   ) %>% 
   pivot_wider(
@@ -1119,22 +1123,24 @@ dat.females.15.49 <- sim.results.combination.v2 %>%
   mutate(Year = floor(Year - .5)) %>% 
   filter(Gender ==1, Age >=15, Age < 50) %>% 
   group_by(Year, scenario_name, sim.ix) %>% 
-  summarize(
+    summarize(
     Population = sum(Population * pop.scaling.factor/2),
     PLHIV = sum(Infected * pop.scaling.factor/2),
     Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
-    On_ART = sum(On_ART * pop.scaling.factor)
+    Died_from_HIV = sum(Newly.Infected * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor/2)
   ) %>% 
   group_by(Year, scenario_name) %>% 
   summarize(
     Population = mean(Population), 
     PLHIV = mean(PLHIV),
     Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV),
     On_ART = mean(On_ART)
   ) %>% 
   ungroup() %>% 
   pivot_longer(
-    cols = c(Population, PLHIV, Newly.Infected, On_ART),
+    cols = c(Population, PLHIV, Newly.Infected, Died_from_HIV, On_ART),
     names_to = "indicator"
   ) %>% 
   pivot_wider(
@@ -1150,22 +1156,24 @@ dat.adults <- sim.results.combination.v2 %>%
   mutate(Year = floor(Year - .5)) %>% 
   filter(Age < 15) %>% 
   group_by(Year, scenario_name, sim.ix) %>% 
-  summarize(
+    summarize(
     Population = sum(Population * pop.scaling.factor/2),
     PLHIV = sum(Infected * pop.scaling.factor/2),
     Newly.Infected = sum(Newly.Infected * pop.scaling.factor),
-    On_ART = sum(On_ART * pop.scaling.factor)
+    Died_from_HIV = sum(Newly.Infected * pop.scaling.factor),
+    On_ART = sum(On_ART * pop.scaling.factor/2)
   ) %>% 
   group_by(Year, scenario_name) %>% 
   summarize(
     Population = mean(Population), 
     PLHIV = mean(PLHIV),
     Newly.Infected = mean(Newly.Infected),
+    Died_from_HIV = mean(Died_from_HIV),
     On_ART = mean(On_ART)
   ) %>% 
   ungroup() %>% 
   pivot_longer(
-    cols = c(Population, PLHIV, Newly.Infected, On_ART),
+    cols = c(Population, PLHIV, Newly.Infected, Died_from_HIV, On_ART),
     names_to = "indicator"
   ) %>% 
   pivot_wider(
@@ -1176,7 +1184,7 @@ dat.adults <- sim.results.combination.v2 %>%
   mutate(group = 5) %>% 
   mutate(model = "emod", iso3 = "MWI", sex = "both", age_group = "<15")
 
-custom_order <- c("Population", "PLHIV", "Newly.Infected", "On_ART")
+custom_order <- c("Population", "PLHIV", "Newly.Infected", "Died_from_HIV", "On_ART")
 custom_order2 <- c("daly.baseline", "daly.retention","daly.prep","daly.self.test","daly.linkage","daly.self.linkage","daly.self.linkage.retention", "daly.all")
 
 dat.all <- rbind(
@@ -1192,7 +1200,7 @@ dat.all <- rbind(
   select(model, iso3, scenario_name, indicator, population, sex, age_group, "2018":"2046", group) %>% 
   arrange(scenario_name, population, group)
 
-write_csv(dat.all, "HIVMC_AI/annual_indicators.csv")
+write_csv(dat.all, "HIVMC_AI/annual_indicators_v2.csv")
 
 ```
 
