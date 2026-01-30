@@ -527,7 +527,10 @@
          "EffectiveART_Linkage_Services",
          "EffectiveART",
          "NonSuppressiveART_staging",
-         "NonSuppressiveART"
+         "NonSuppressiveART",
+         "HCTTestingLoop1",
+         "Program_VMMC",
+         "Needs_PMTCT_Diagnostic_Test"
       ],
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 2018,
