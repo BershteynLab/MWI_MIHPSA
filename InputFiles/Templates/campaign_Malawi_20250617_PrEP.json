@@ -1919,12 +1919,12 @@
                     "Actual_IndividualIntervention_Config": {
                         "class": "HIVRandomChoice",
                         "Choice_Names": [
-                            "HCTTestingLoopRapidTest",
-                            "HCTTestingLoop0"
+                            "HCTTestingLoop0",
+                            "HCTUptakePostDebut1"
                         ],
                         "Choice_Probabilities": [
-                            0.05,
-                            0.95
+                            0.95,
+                            0.05
                         ],
                         "New_Property_Value": "InterventionStatus:HCTTestingLoop",
                         "Disqualifying_Properties": [
