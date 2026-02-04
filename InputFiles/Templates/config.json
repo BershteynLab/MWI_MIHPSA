@@ -406,8 +406,8 @@
       "Report_HIV_ByAgeAndGender_Add_Concordant_Relationships": 0,
       "Report_HIV_ByAgeAndGender_Add_Relationships": 0,
       "Report_HIV_ByAgeAndGender_Add_Transmitters": 0,
-      "Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [0,15,20,25,30,35,40,45,50,99],
-      ".Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [
+      ".Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [0,15,20,25,30,35,40,45,50,99],
+      "Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data": [
          0,
          1,
          2,
@@ -513,13 +513,10 @@
       "Report_HIV_ByAgeAndGender_Collect_Gender_Data": 1,
       "Report_HIV_ByAgeAndGender_Collect_HIV_Data": 1,
       "Report_HIV_ByAgeAndGender_Collect_HIV_Stage_Data": 0,
-      ".Report_HIV_ByAgeAndGender_Collect_IP_Data": [],
-      "Report_HIV_ByAgeAndGender_Collect_IP_Data": [
-         "ARTStatus"
-      ],
+      "Report_HIV_ByAgeAndGender_Collect_IP_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_Intervention_Data": [],
       "Report_HIV_ByAgeAndGender_Collect_On_Art_Data": 0,
-      "Report_HIV_ByAgeAndGender_Event_Counter_List": [
+      ".Report_HIV_ByAgeAndGender_Event_Counter_List": [
          "HCTTestingLoop1",
          "OnART1",
          "EffectiveART",
@@ -528,7 +525,7 @@
          "Initiate_Background_PrEP",
          "Program_VMMC"
       ],
-      ".Report_HIV_ByAgeAndGender_Event_Counter_List": [
+      "Report_HIV_ByAgeAndGender_Event_Counter_List": [
          "Initiate_Background_PrEP",
          "Initiate_Intervention_PrEP",
          "OnART1_defaulter_tracer",
@@ -544,7 +541,7 @@
       "Report_HIV_ByAgeAndGender_Has_Intervention_With_Name": "",
       "Report_HIV_ByAgeAndGender_Start_Year": 2018,
       "Report_HIV_ByAgeAndGender_Stop_Year": 2050,
-      "Report_HIV_ByAgeAndGender_Stratify_Infected_By_CD4": 1,
+      "Report_HIV_ByAgeAndGender_Stratify_Infected_By_CD4": 0,
       "Report_HIV_Event_Channels_List": [],
       "Report_HIV_Infection": 0,
       "Report_HIV_Mortality": 0,
@@ -565,8 +562,7 @@
       "Sexual_Debut_Age_Male_Weibull_Scale": 16.946729660034,
       "Sexual_Debut_Age_Min": 13,      
       "Sexual_Debut_Age_Setting_Type": "WEIBULL",         
-      ".Simulation_Duration": 31755,
-      "Simulation_Duration": 21900,
+      "Simulation_Duration": 31755,
       "Simulation_Timestep": 30.4166666666667,
       "Simulation_Type": "HIV_SIM",
       "SMALL_Base_Population_Scale_Factor": 0.0001,

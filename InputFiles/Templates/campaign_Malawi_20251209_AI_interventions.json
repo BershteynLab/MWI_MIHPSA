@@ -3040,8 +3040,6 @@
                             0.37
                         ],
                         "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
                             "InterventionStatus:LostForever"
                         ],
                         "class": "HIVRandomChoice"
@@ -3078,8 +3076,6 @@
                             0.151
                         ],
                         "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
                             "InterventionStatus:LostForever"
                         ],
                         "class": "HIVRandomChoice"
@@ -3116,8 +3112,6 @@
                             0.254
                         ],
                         "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
                             "InterventionStatus:LostForever"
                         ],
                         "class": "HIVRandomChoice"
@@ -3154,8 +3148,6 @@
                             0.109
                         ],
                         "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
                             "InterventionStatus:LostForever"
                         ],
                         "class": "HIVRandomChoice"
@@ -3190,8 +3182,6 @@
                             1.0
                         ],
                         "Disqualifying_Properties": [
-                            "InterventionStatus:OnEffectiveART",
-                            "InterventionStatus:OnNonSuppressiveART",
                             "InterventionStatus:LostForever"
                         ],
                         "class": "HIVRandomChoice"
@@ -3685,6 +3675,26 @@
                     "Trigger_Condition_List": [ "OnART3_rundropout" ],
                     "Actual_IndividualIntervention_Config": {
                         "class": "ARTDropout"
+                    }
+                }
+            }
+        },
+        {
+            "Event_Name": "OnART: switch InterventionStatus off",
+            "class": "CampaignEventByYear",
+            "Nodeset_Config": { "class": "NodeSetAll" },
+            "Start_Year": 1990,
+            "Event_Coordinator_Config": {
+                "class": "StandardInterventionDistributionEventCoordinator",
+                    "Intervention_Config":{
+                        "class":"NodeLevelHealthTriggeredIV",
+                        "Trigger_Condition_List": [
+                            "OnART3_rundropout"
+                        ],
+                        "Actual_IndividualIntervention_Config": {
+                            "class": "PropertyValueChanger",
+                            "Target_Property_Key":"InterventionStatus",
+                            "Target_Property_Value":"None"
                     }
                 }
             }
