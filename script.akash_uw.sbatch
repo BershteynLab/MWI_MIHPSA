@@ -21,4 +21,4 @@
 
 #python run_scenarios.py -c optim_script_transmission.py --resample-method provided --samples resampled_parameter_sets_20230424.csv --output-dir MWI_transmission --suite-name MWI_transmission --table scenarios_transmission.csv
 
-python run_scenarios.py -c optim_script_akash_uw.py --resample-method provided --samples resampled_parameter_sets_20230424.csv --output-dir akash_uw --suite-name akash_uw --table scenarios_akash_uw.csv
+python run_scenarios.py -c optim_script_akash_uw.py --resample-method provided --samples resampled_parameter_sets_20230424_short.csv --output-dir akash_uw --suite-name akash_uw --table scenarios_akash_uw.csv
