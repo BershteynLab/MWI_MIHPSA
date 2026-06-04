@@ -1373,17 +1373,16 @@ merge(
 # Plugging the ART cascade leak
 
 ```{r}
-input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_AI_baseline___2026_02_03_22_02_52_273410/"
+input_path = "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-v4_baseline_test___2026_02_05_17_50_54_066672/"
 
 sim.results.test.ai <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
   scenario_name = 'test.ai',
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
-                        "Diagnosed",
-                        "HCTTestingLoop1","OnART1","EffectiveART","NonSuppressiveART_staging","NonSuppressiveART","Initiate_Background_PrEP","Program_VMMC"
+                        "Diagnosed"
                         ),
-  stratify_columns = c("Year", "Gender", "Age", "IP_Key.InterventionStatus"),
+  stratify_columns = c("Year", "Gender", "Age"),
   min_age_inclusive = 0,
   max_age_inclusive = 99
 ) %>% 
@@ -1405,11 +1404,11 @@ sim.results.test.sq <- EMODAnalyzeR::read.simulation.results.bigpurple(
 ) %>% 
   mutate(EffectiveART_Linkage_Services = 0)
 
-input_path <- "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_AI_baseline_v2___2026_02_04_09_34_13_460479"
+input_path <- "/gpfs/scratch/citrod01/experiments/Malawi/HIVMC_AI/Baseline-campaign_Malawi_20251209_AI_interventions-test_AI_baseline_v4___2026_02_04_15_21_07_716377/"
 
-sim.results.test.ai.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
+sim.results.test.ai.v4 <- EMODAnalyzeR::read.simulation.results.bigpurple(
   experiment_path = input_path,
-  scenario_name = 'test.ai.v2',
+  scenario_name = 'test.ai.v3',
   summarize_columns = c("Newly.Infected", "Newly.Tested.Positive", "Newly.Tested.Negative",
                         "Population","Infected", "On_ART","Died", "Died_from_HIV",
                         "Diagnosed",
@@ -1422,9 +1421,9 @@ sim.results.test.ai.v2 <- EMODAnalyzeR::read.simulation.results.bigpurple(
   mutate(EffectiveART_Linkage_Services = 0)
 
 test.results <- rbind(
-  sim.results.test.sq,
-  sim.results.test.ai,
-  sim.results.test.ai.v2
+  # sim.results.test.sq,
+  sim.results.test.ai#,
+  #sim.results.test.ai.v4
   )
 
 sim.results.pop.scaling <- test.results %>% 
@@ -1443,7 +1442,48 @@ test.results <- test.results %>%
 ## Let's look at when incidence diverges
 ```{r}
 test.results %>% 
-  filter(Year >=2008) %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  filter(Year >=2005) %>% 
+  group_by(Year, Gender, sim.ix, scenario_name) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected * pop.scaling.factor), 
+            Infected = sum(Infected * pop.scaling.factor), 
+            On_ART = sum(On_ART * pop.scaling.factor)) %>% 
+  group_by(Year, Gender, scenario_name) %>% 
+  summarize(Newly.Infected = mean(Newly.Infected),
+            Infected= mean(Infected), 
+            On_ART = mean(On_ART)) %>% 
+  pivot_longer(cols = c(Newly.Infected, Infected, On_ART), values_to = "Value", names_to = "Metric") %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Value, color = scenario_name)) + 
+  facet_grid(rows = vars(Metric), cols = vars(Gender), scales = 'free_y')
+```
+
+```{r}
+sim.results.combination
+test.results %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  filter(Year >=2005) %>% 
+  group_by(Year, Gender, sim.ix, scenario_name) %>% 
+  summarize(Newly.Infected = sum(Newly.Infected * pop.scaling.factor), 
+            Infected = sum(Infected * pop.scaling.factor), 
+            On_ART = sum(On_ART * pop.scaling.factor)) %>% 
+  group_by(Year, Gender, scenario_name) %>% 
+  summarize(Newly.Infected = mean(Newly.Infected),
+            Infected= mean(Infected), 
+            On_ART = mean(On_ART)) %>% 
+  pivot_longer(cols = c(Newly.Infected, Infected, On_ART), values_to = "Value", names_to = "Metric") %>%
+  ggplot() + 
+  geom_line(mapping = aes(x = Year, y = Value, color = scenario_name)) + 
+  facet_grid(rows = vars(Metric), cols = vars(Gender), scales = 'free_y')
+
+```
+
+
+```{r}
+sim.results.combination %>% 
+  filter(scenario_name == 'daly.baseline') %>% 
+  mutate(Year = floor(Year - .5)) %>% 
+  filter(Year >=2005) %>% 
   group_by(Year, Gender, sim.ix, scenario_name) %>% 
   summarize(Newly.Infected = sum(Newly.Infected * pop.scaling.factor), 
             Infected = sum(Infected * pop.scaling.factor), 
@@ -1462,22 +1502,21 @@ test.results %>%
 ## Let's take a peek at the ART cascade
 ```{r}
 test.results %>% 
-  group_by(Year, Gender, sim.ix, scenario_name) %>% 
+  group_by(Year, sim.ix, scenario_name) %>% 
   filter(Year >= 2008) %>% 
-  filter(Age < 35) %>% 
   summarize(
     HCTTestingLoop1 = sum(HCTTestingLoop1 * pop.scaling.factor),
     OnART1 = sum(OnART1 * pop.scaling.factor),
     EffectiveART = sum(EffectiveART * pop.scaling.factor),
     NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor)) %>% 
-  group_by(Year, Gender, scenario_name) %>% 
+  group_by(Year, scenario_name) %>% 
   summarize(
     HCTTestingLoop1 = mean(HCTTestingLoop1), 
     OnART1 = mean(OnART1), 
     EffectiveART = mean(EffectiveART),
     NonSuppressiveART_staging = mean(NonSuppressiveART_staging)
   ) %>% 
-  arrange(Year, Gender, scenario_name) %>% 
+  arrange(Year, scenario_name) %>% 
   mutate(Total_ART_Inits = EffectiveART + NonSuppressiveART_staging)
 ```
 
@@ -1534,5 +1573,44 @@ test.results %>%
     EffectiveART = mean(EffectiveART),
     NonSuppressiveART_staging = mean(NonSuppressiveART_staging)
   )
+
+test.results %>% 
+  filter(Year %in% c(2008, 2009.5, 2010.5, 2011, 2011.5)) %>% 
+  group_by(sim.ix, scenario_name, Year, IP_Key.InterventionStatus) %>% 
+  summarize(
+    HCTTestingLoop1 = sum(HCTTestingLoop1 * pop.scaling.factor),
+    OnART1 = sum(OnART1 * pop.scaling.factor),
+    EffectiveART = sum(EffectiveART * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor)) %>% 
+  group_by(scenario_name, Year, IP_Key.InterventionStatus) %>% 
+  summarize(
+    HCTTestingLoop1 = mean(HCTTestingLoop1),
+    OnART1 = mean(OnART1),
+    EffectiveART = mean(EffectiveART),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging)
+  ) %>% 
+  filter(OnART1 >0) %>% 
+  mutate(Total_ART_Inits = EffectiveART + NonSuppressiveART_staging)
+```
+
+```{r}
+test.results %>% 
+  filter(Year >= 2008) %>%
+  filter(scenario_name == 'test.ai.v3') %>% 
+  group_by(sim.ix, scenario_name, Year, IP_Key.InterventionStatus) %>% 
+  summarize(
+    HCTTestingLoop1 = sum(HCTTestingLoop1 * pop.scaling.factor),
+    OnART1 = sum(OnART1 * pop.scaling.factor),
+    EffectiveART = sum(EffectiveART * pop.scaling.factor),
+    NonSuppressiveART_staging = sum(NonSuppressiveART_staging * pop.scaling.factor)) %>% 
+  group_by(scenario_name, Year, IP_Key.InterventionStatus) %>% 
+  summarize(
+    HCTTestingLoop1 = mean(HCTTestingLoop1),
+    OnART1 = mean(OnART1),
+    EffectiveART = mean(EffectiveART),
+    NonSuppressiveART_staging = mean(NonSuppressiveART_staging)
+  ) %>% 
+  filter(OnART1 >0) %>% 
+  mutate(Total_ART_Inits = EffectiveART + NonSuppressiveART_staging)
 ```
 
