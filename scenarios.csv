@@ -1,2 +1,3 @@
 Scenario,Campaign
-MWI_Base,campaign_Malawi_20220422_recalib.json
+hivcontrol_baseline,campaign_Malawi_20250617_HIVControl_baseline_noprevention.json
+hivcontrol_statusquo,campaign_Malawi_20250617_PrEP.json
