@@ -1,22 +1,34 @@
-# Malawi MIHPSA
+# Malawi Calibration
 
-These are the configuration files for the Malawi MIHPSA collaboration.
+## Features
 
-## Major updates
+* Commercial sex
+* Male circumcision
+  * Traditional
+  * VMMC pre-dating program
+  * Program_VMMC
+* HCT Testing Loop
+* Symptomatic Testing
+* ANC and PMTCT
+* ART Cascade
+* Oral PrEP
 
-* 2024-09-01
-    * Simulation updates
-        * Update to most recent EMOD build
-        * Update config files accordingly
-    * Model updates:
-        * Updated VMMC
-        * Removed PrEP
-        * Updated Accessibility using RTEC-HIV
-        * Minimal scenario for MIHPSA-MWI completed
-* 2023-11-03 - Repeating the attributions of deaths and transmissions simulations for Malawi
-    * using 250 simulation runs 
-    * Important to remember that there's a different optim_script for each of the transmissions and deaths 
-* 2022-09-16 - Added scripts for attributions of deaths and attributions of transmission
-* 2022-04-27 - Created campaign files and performed calibration for phase 1
+## Data Provenance
 
-# Model Features
+* Population
+  * Calibrated to UN WPP for Malawi
+* HIV Prevalence
+  * Malawi DHS 2004
+  * Malawi DHS 2010
+  * Malawi PHIA 2015-2016
+* HIV Incidence
+  * Malawi PHIA 2015-2016
+* ART Coverage
+  * Calibrated to Malawi MOH data via SPECTRUM template
+* Oral PrEP
+  * Supplied via MWI MOH data
+
+## Notes
+
+* The incidence projected by this model is higher than the other models in the HIV modeling consortium
+* This model was developed in 2024 and at baseline does not have PEPFAR-related disruptions built into it.

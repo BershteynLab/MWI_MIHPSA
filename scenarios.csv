@@ -1,3 +1,2 @@
 Scenario,Campaign
-hivcontrol_baseline,campaign_Malawi_20250617_HIVControl_baseline_noprevention.json
-hivcontrol_statusquo,campaign_Malawi_20250617_PrEP.json
+baseline,campaign_Malawi_20251215.json
